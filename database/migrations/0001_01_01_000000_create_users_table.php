@@ -7,17 +7,21 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Run the migrations.
+     * Crea la tabla usuarios (contrato del equipo, en lugar de users),
+     * además de las tablas de recuperación de contraseña y sesiones.
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('usuarios', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->rememberToken();
+            $table->string('nombre', 60);
+            $table->string('apellido', 60);
+            $table->string('email', 30)->unique();
+            $table->string('password', 60);
+            $table->string('telefono', 10)->nullable();
+            $table->boolean('admin')->default(false);
+            $table->boolean('confirmado')->default(false);
+            $table->string('token', 15)->nullable();
             $table->timestamps();
         });
 
@@ -38,11 +42,11 @@ return new class extends Migration
     }
 
     /**
-     * Reverse the migrations.
+     * Elimina las tablas creadas por esta migración.
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('usuarios');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
     }
