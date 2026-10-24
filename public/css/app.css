@@ -1,0 +1,89 @@
+/*
+ * Estilos propios de AppSalon. Paleta y reglas en docs/guia-visual.md.
+ * Bootstrap 5 se carga antes por CDN; aquí solo se ajusta lo necesario.
+ */
+
+:root {
+    --salon-primary: #7B2D5B;
+    --salon-primary-dark: #5E2245;
+    --salon-accent: #E8A0BF;
+    --salon-bg: #FAF6F8;
+    --salon-surface: #FFFFFF;
+    --salon-text: #2B2B2B;
+    --salon-muted: #6C6C6C;
+
+    /* Bootstrap usa el primario del salón en btn-primary, bg-primary, enlaces, etc. */
+    --bs-primary: var(--salon-primary);
+    --bs-primary-rgb: 123, 45, 91;
+    --bs-link-color: var(--salon-primary);
+    --bs-link-color-rgb: 123, 45, 91;
+    --bs-link-hover-color: var(--salon-primary-dark);
+    --bs-link-hover-color-rgb: 94, 34, 69;
+    --bs-body-bg: var(--salon-bg);
+    --bs-body-color: var(--salon-text);
+    --bs-secondary-color: var(--salon-muted);
+}
+
+h1, h2, h3, .navbar-brand {
+    font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-weight: 600;
+}
+
+/* Botón primario: Bootstrap no toma --bs-primary para los botones, se define aquí. */
+.btn-primary {
+    --bs-btn-bg: var(--salon-primary);
+    --bs-btn-border-color: var(--salon-primary);
+    --bs-btn-hover-bg: var(--salon-primary-dark);
+    --bs-btn-hover-border-color: var(--salon-primary-dark);
+    --bs-btn-active-bg: var(--salon-primary-dark);
+    --bs-btn-active-border-color: var(--salon-primary-dark);
+    --bs-btn-disabled-bg: var(--salon-primary);
+    --bs-btn-disabled-border-color: var(--salon-primary);
+    --bs-btn-focus-shadow-rgb: 123, 45, 91;
+}
+
+.btn-outline-primary {
+    --bs-btn-color: var(--salon-primary);
+    --bs-btn-border-color: var(--salon-primary);
+    --bs-btn-hover-bg: var(--salon-primary);
+    --bs-btn-hover-border-color: var(--salon-primary);
+    --bs-btn-active-bg: var(--salon-primary-dark);
+    --bs-btn-active-border-color: var(--salon-primary-dark);
+    --bs-btn-focus-shadow-rgb: 123, 45, 91;
+}
+
+.form-control:focus,
+.form-check-input:focus {
+    border-color: var(--salon-accent);
+    box-shadow: 0 0 0 0.25rem rgba(123, 45, 91, 0.2);
+}
+
+.form-check-input:checked {
+    background-color: var(--salon-primary);
+    border-color: var(--salon-primary);
+}
+
+/* Tarjeta para formularios de login y registro. */
+.card-form {
+    max-width: 32rem;
+    margin-inline: auto;
+    background-color: var(--salon-surface);
+    border: 0;
+    box-shadow: 0 0.5rem 1.5rem rgba(43, 43, 43, 0.08);
+}
+
+.precio {
+    color: var(--salon-primary-dark);
+    font-weight: 600;
+}
+
+/* El botón Cerrar sesión es un <form>; se alinea con los enlaces del navbar. */
+.navbar .btn-link.nav-link {
+    text-decoration: none;
+}
+
+.footer-salon {
+    background-color: var(--salon-surface);
+    color: var(--salon-muted);
+    border-top: 1px solid rgba(123, 45, 91, 0.1);
+}
