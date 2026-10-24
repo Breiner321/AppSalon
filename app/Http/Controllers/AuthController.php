@@ -2,6 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\RegisterRequest;
+use App\Models\User;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Log;
+use Illuminate\View\View;
+use Throwable;
+
 /**
  * Registro, inicio y cierre de sesión de los clientes del salón.
  */
@@ -10,28 +17,43 @@ class AuthController extends Controller
     /**
      * Muestra el formulario de registro.
      */
-    public function showRegister()
+    public function showRegister(): View
     {
-        // TODO A3: devolver la vista auth.registro
-        abort(501);
+        return view('auth.registro');
     }
 
     /**
-     * Crea la cuenta de un cliente nuevo.
+     * Crea la cuenta de un cliente nuevo y lo envía al login.
+     *
+     * Solo se guardan los campos validados; admin y confirmado quedan con su
+     * valor por defecto (false). El cast 'hashed' del modelo aplica bcrypt.
      */
-    public function register()
+    public function register(RegisterRequest $request): RedirectResponse
     {
-        // TODO A3: validar con RegisterRequest y crear el usuario
-        abort(501);
+        try {
+            User::create($request->safe()->only(['nombre', 'apellido', 'email', 'password', 'telefono']));
+        } catch (Throwable $e) {
+            Log::error('No se pudo registrar el usuario', [
+                'email' => $request->input('email'),
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()
+                ->withInput($request->except('password', 'password_confirmation'))
+                ->with('error', 'No pudimos crear tu cuenta. Intenta de nuevo en unos minutos.');
+        }
+
+        return redirect()
+            ->route('login')
+            ->with('success', 'Cuenta creada, ya puedes iniciar sesión');
     }
 
     /**
      * Muestra el formulario de inicio de sesión.
      */
-    public function showLogin()
+    public function showLogin(): View
     {
-        // TODO A3: devolver la vista auth.login
-        abort(501);
+        return view('auth.login');
     }
 
     /**
