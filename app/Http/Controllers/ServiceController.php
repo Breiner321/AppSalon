@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\View\View;
+
 /**
  * Servicios del salón: catálogo público y CRUD del panel de administración.
  */
@@ -10,10 +12,10 @@ class ServiceController extends Controller
     /**
      * Catálogo público de servicios (rutas / y /servicios).
      */
-    public function catalog()
+    public function catalog(): View
     {
-        // TODO A3: devolver la vista services.index (catálogo real en U4)
-        return view('welcome');
+        // TODO U4: cargar los servicios activos y mostrarlos en tarjetas
+        return view('services.index');
     }
 
     /**
