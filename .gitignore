@@ -22,3 +22,9 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# AppSalon: base SQLite local y archivos de entorno/editor
+/database/*.sqlite
+/database/*.sqlite-journal
+.env.*.local
+desktop.ini
