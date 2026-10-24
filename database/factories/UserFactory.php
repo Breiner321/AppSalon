@@ -5,41 +5,56 @@ namespace Database\Factories;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 /**
+ * Genera usuarios de prueba que respetan los límites de la tabla usuarios.
+ *
  * @extends Factory<User>
  */
 class UserFactory extends Factory
 {
     /**
-     * The current password being used by the factory.
+     * Hash de la contraseña 'password', calculado una sola vez.
      */
     protected static ?string $password;
 
     /**
-     * Define the model's default state.
+     * Estado por defecto: cliente confirmado, no administrador.
+     * El email tiene como máximo 30 caracteres (p. ej. usuario1234@example.com).
      *
      * @return array<string, mixed>
      */
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
+            'nombre' => fake()->firstName(),
+            'apellido' => fake()->lastName(),
+            'email' => fake()->unique()->numerify('usuario####').'@example.com',
             'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
+            'telefono' => fake()->numerify('##########'),
+            'admin' => false,
+            'confirmado' => true,
+            'token' => null,
         ];
     }
 
     /**
-     * Indicate that the model's email address should be unverified.
+     * Usuario con permisos de administrador.
      */
-    public function unverified(): static
+    public function admin(): static
     {
         return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
+            'admin' => true,
+        ]);
+    }
+
+    /**
+     * Usuario que aún no confirma su cuenta.
+     */
+    public function unconfirmed(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'confirmado' => false,
         ]);
     }
 }
