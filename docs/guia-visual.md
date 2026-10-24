@@ -143,3 +143,25 @@ Si no hay servicios activos se muestra un `alert alert-info` con el texto "Aún 
    ```
    Las claves permitidas son `success`, `error`, `warning` e `info`. `<x-alert />`, incluido en el layout, las muestra automáticamente, así que las vistas no tienen que hacer nada.
 7. **Si falla una escritura**, el controlador la envuelve en `try/catch`, registra el detalle con `Log::error()` y redirige con `back()->withInput()->with('error', '…')`. Al usuario nunca se le muestra el mensaje técnico.
+
+## 6. Componentes Blade del proyecto
+
+| Componente | Archivo | Uso |
+|---|---|---|
+| `<x-alert />` | `resources/views/components/alert.blade.php` | Ya está en el layout. Muestra los flash `success`, `error`, `warning` e `info` como `alert-dismissible` con un icono |
+| `<x-form-error field="campo" />` | `resources/views/components/form-error.blade.php` | Muestra `@error('campo')` dentro de `div.invalid-feedback`. Se coloca justo después del input |
+
+Ejemplo de un campo completo, con label, valor anterior, marca de error, ayuda y mensaje:
+
+```blade
+<div class="mb-3">
+    <label for="telefono" class="form-label">Teléfono <span class="text-body-secondary">(opcional)</span></label>
+    <input type="tel" name="telefono" id="telefono" inputmode="numeric" maxlength="10"
+           class="form-control @error('telefono') is-invalid @enderror"
+           value="{{ old('telefono') }}" aria-describedby="telefono-ayuda">
+    <div id="telefono-ayuda" class="form-text">10 dígitos, sin espacios.</div>
+    <x-form-error field="telefono" />
+</div>
+```
+
+`invalid-feedback` solo se ve si es hermano de un `.is-invalid`. Si va después de un `form-text`, también se muestra, porque Bootstrap usa el selector `~` (hermano posterior).
