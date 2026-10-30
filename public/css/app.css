@@ -102,6 +102,25 @@ h1, h2, h3, .navbar-brand {
     --bs-pagination-focus-box-shadow: 0 0 0 0.25rem rgba(123, 45, 91, 0.2);
 }
 
+/* Tarjetas de conteo del panel de administración. */
+.card-estadistica {
+    background-color: var(--salon-surface);
+    border: 0;
+    box-shadow: 0 0.25rem 1rem rgba(43, 43, 43, 0.06);
+}
+
+.icono-estadistica {
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.numero-estadistica {
+    font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 2rem;
+    font-weight: 600;
+    line-height: 1.1;
+}
+
 /* Tarjetas del catálogo de servicios. */
 .card-servicio {
     background-color: var(--salon-surface);
@@ -128,9 +147,9 @@ h1, h2, h3, .navbar-brand {
     font-weight: 600;
 }
 
-/* El botón Cerrar sesión es un <form>; se alinea con los enlaces del navbar. */
-.navbar .btn-link.nav-link {
-    text-decoration: none;
+/* Menú del usuario: el ítem activo del dropdown usa el primario del salón. */
+.dropdown-menu {
+    --bs-dropdown-link-active-bg: var(--salon-primary);
 }
 
 .footer-salon {
