@@ -71,7 +71,7 @@ export async function abrirChrome() {
         },
         async ir(ruta) {
             const carga = una('Page.loadEventFired');
-            await enviar('Page.navigate', { url: ruta.startsWith('http') ? ruta : BASE + ruta });
+            await enviar('Page.navigate', { url: /^[a-z]+:/i.test(ruta) ? ruta : BASE + ruta });
             await carga;
             await esperar(400); // fuentes e íconos del CDN
         },
