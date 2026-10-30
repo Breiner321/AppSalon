@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
+use App\Mail\ConfirmarCuenta;
 use App\Models\User;
 use App\Support\HandlesDatabaseErrors;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 /**
@@ -27,16 +30,55 @@ class AuthController extends Controller
     }
 
     /**
-     * Crea la cuenta de un cliente nuevo y lo envía al login.
+     * Crea la cuenta de un cliente nuevo, le envía el correo de confirmación
+     * y lo lleva al login.
      *
-     * Solo se guardan los campos validados; admin y confirmado quedan con su
-     * valor por defecto (false). El cast 'hashed' del modelo aplica bcrypt.
+     * Solo se guardan los campos validados; admin queda en false. token y
+     * confirmado están fuera de $fillable, por eso se asignan con forceFill.
+     * El cast 'hashed' del modelo aplica bcrypt. El correo se envía dentro de
+     * la transacción: si falla, la cuenta no queda creada a medias.
      */
     public function register(RegisterRequest $request): RedirectResponse
     {
+        $resultado = $this->runSafely(function () use ($request) {
+            $usuario = new User($request->safe()->only(['nombre', 'apellido', 'email', 'password', 'telefono']));
+            $usuario->forceFill([
+                'token' => Str::random(15),
+                'confirmado' => false,
+            ])->save();
+
+            Mail::to($usuario)->send(new ConfirmarCuenta($usuario));
+
+            return $usuario;
+        }, 'No pudimos crear tu cuenta. Intenta de nuevo en unos minutos.');
+
+        if ($resultado instanceof RedirectResponse) {
+            return $resultado;
+        }
+
+        return redirect()
+            ->route('login')
+            ->with('success', 'Revisa tu correo para confirmar la cuenta');
+    }
+
+    /**
+     * Confirma la cuenta con el token del enlace enviado por correo.
+     *
+     * El token se borra al usarlo, así que cada enlace sirve una sola vez.
+     */
+    public function confirmar(string $token): RedirectResponse
+    {
+        $usuario = User::where('token', $token)->first();
+
+        if (! $usuario) {
+            return redirect()
+                ->route('login')
+                ->with('error', 'Token no válido');
+        }
+
         $resultado = $this->runSafely(
-            fn () => User::create($request->safe()->only(['nombre', 'apellido', 'email', 'password', 'telefono'])),
-            'No pudimos crear tu cuenta. Intenta de nuevo en unos minutos.'
+            fn () => $usuario->forceFill(['confirmado' => true, 'token' => null])->save(),
+            'No pudimos confirmar tu cuenta. Intenta de nuevo en unos minutos.'
         );
 
         if ($resultado instanceof RedirectResponse) {
@@ -45,7 +87,7 @@ class AuthController extends Controller
 
         return redirect()
             ->route('login')
-            ->with('success', 'Cuenta creada, ya puedes iniciar sesión');
+            ->with('success', 'Cuenta confirmada');
     }
 
     /**
@@ -63,6 +105,9 @@ class AuthController extends Controller
      * qué cuentas están registradas. Si funciona, se regenera el id de sesión
      * (evita la fijación de sesión) y se envía al usuario a la página que
      * intentaba ver o, si no había ninguna, a la que corresponde a su rol.
+     *
+     * Una cuenta sin confirmar (A7) no puede entrar aunque la contraseña sea
+     * correcta: se cierra la sesión recién abierta y se le pide confirmar.
      */
     public function login(LoginRequest $request): RedirectResponse
     {
@@ -72,10 +117,21 @@ class AuthController extends Controller
                 ->withErrors(['email' => 'Credenciales incorrectas']);
         }
 
-        $request->session()->regenerate();
-
         /** @var User $usuario */
         $usuario = Auth::user();
+
+        if (! $usuario->confirmado) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()
+                ->route('login')
+                ->withInput($request->only('email'))
+                ->with('warning', 'Confirma tu cuenta desde el enlace enviado a tu correo');
+        }
+
+        $request->session()->regenerate();
 
         return redirect()
             ->intended(self::inicioSegunRol($usuario))
