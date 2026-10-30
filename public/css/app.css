@@ -72,6 +72,57 @@ h1, h2, h3, .navbar-brand {
     box-shadow: 0 0.5rem 1.5rem rgba(43, 43, 43, 0.08);
 }
 
+/* Variante más ancha para el formulario de servicios del panel. */
+.card-form-amplia {
+    max-width: 44rem;
+}
+
+/* Contenedor de las tablas del panel. */
+.card-tabla {
+    background-color: var(--salon-surface);
+    border: 0;
+    box-shadow: 0 0.25rem 1rem rgba(43, 43, 43, 0.06);
+    overflow: hidden;
+}
+
+.card-tabla thead th {
+    color: var(--salon-muted);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.pagination {
+    --bs-pagination-active-bg: var(--salon-primary);
+    --bs-pagination-active-border-color: var(--salon-primary);
+    --bs-pagination-color: var(--salon-primary);
+    --bs-pagination-hover-color: var(--salon-primary-dark);
+    --bs-pagination-focus-color: var(--salon-primary-dark);
+    --bs-pagination-focus-box-shadow: 0 0 0 0.25rem rgba(123, 45, 91, 0.2);
+}
+
+/* Tarjetas del catálogo de servicios. */
+.card-servicio {
+    background-color: var(--salon-surface);
+    border: 0;
+    border-top: 4px solid var(--salon-accent);
+    box-shadow: 0 0.25rem 1rem rgba(43, 43, 43, 0.06);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card-servicio:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1.5rem rgba(43, 43, 43, 0.1);
+}
+
+/* Llamada a registrarse que ven los invitados en el catálogo. */
+.cta-registro {
+    background-color: var(--salon-surface);
+    border-left: 4px solid var(--salon-primary);
+    border-radius: var(--bs-border-radius);
+}
+
 .precio {
     color: var(--salon-primary-dark);
     font-weight: 600;

@@ -1,4 +1,4 @@
-{{-- Formulario de inicio de sesión. La lógica de autenticación llega en A4. --}}
+{{-- Formulario de inicio de sesión (A4). Lo valida App\Http\Requests\LoginRequest. --}}
 @extends('layouts.app')
 
 @section('title', 'Iniciar sesión')
