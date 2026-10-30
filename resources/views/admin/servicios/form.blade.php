@@ -28,8 +28,10 @@
                     @method('PUT')
                 @endif
 
+                <p class="form-text mt-0 mb-3">Los campos marcados con <span class="text-danger">*</span> son obligatorios.</p>
+
                 <div class="mb-3">
-                    <label for="nombre" class="form-label">Nombre</label>
+                    <label for="nombre" class="form-label requerido">Nombre</label>
                     <input type="text" name="nombre" id="nombre" maxlength="60" required
                            class="form-control @error('nombre') is-invalid @enderror"
                            value="{{ old('nombre', $servicio->nombre) }}">
@@ -38,7 +40,7 @@
 
                 <div class="row g-3 mb-3">
                     <div class="col-12 col-md-6">
-                        <label for="precio" class="form-label">Precio</label>
+                        <label for="precio" class="form-label requerido">Precio</label>
                         <div class="input-group has-validation">
                             <span class="input-group-text">$</span>
                             <input type="number" name="precio" id="precio" step="0.01" min="0" max="999.99" required
@@ -50,7 +52,7 @@
                     </div>
 
                     <div class="col-12 col-md-6">
-                        <label for="duracion" class="form-label">Duración (min)</label>
+                        <label for="duracion" class="form-label requerido">Duración (min)</label>
                         <input type="number" name="duracion" id="duracion" min="10" max="480" required
                                inputmode="numeric" aria-describedby="duracion-ayuda"
                                class="form-control @error('duracion') is-invalid @enderror"

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Favicon de AppSalon: tijeras blancas sobre el primario del salón (#7B2D5B). -->
+  <rect width="64" height="64" rx="14" fill="#7B2D5B"/>
+  <g fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round">
+    <circle cx="20" cy="44" r="7"/>
+    <circle cx="44" cy="44" r="7"/>
+    <path d="M25 39 L46 12"/>
+    <path d="M39 39 L18 12"/>
+  </g>
+  <circle cx="32" cy="30" r="2.5" fill="#E8A0BF"/>
+</svg>

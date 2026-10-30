@@ -8,6 +8,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@hasSection('title')@yield('title') · @endif{{ config('app.name', 'AppSalon') }}</title>
 
+    <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
@@ -110,6 +111,12 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script>
+        // Las alertas flash (<x-alert />) se cierran solas a los 5 segundos.
+        document.querySelectorAll('.alert[data-autocierre]').forEach(function (alerta) {
+            setTimeout(function () { bootstrap.Alert.getOrCreateInstance(alerta).close(); }, 5000);
+        });
+    </script>
     {{-- Scripts propios de cada vista, con @push('scripts'). Van después de Bootstrap. --}}
     @stack('scripts')
 </body>

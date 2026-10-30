@@ -20,8 +20,13 @@
     </div>
 
     @if ($servicios->isEmpty())
-        <div class="alert alert-info" role="status">
-            <i class="bi bi-info-circle" aria-hidden="true"></i> Aún no hay servicios registrados.
+        <div class="estado-vacio text-center p-5">
+            <i class="bi bi-scissors display-4 text-primary" aria-hidden="true"></i>
+            <h2 class="h5 mt-3">Aún no hay servicios registrados</h2>
+            <p class="text-body-secondary">Crea el primero para que aparezca en el catálogo.</p>
+            <a href="{{ route('admin.servicios.create') }}" class="btn btn-primary">
+                <i class="bi bi-plus-lg" aria-hidden="true"></i> Crear el primer servicio
+            </a>
         </div>
     @else
         {{-- Móvil (< 768 px): tarjetas apiladas con las acciones a la vista. --}}
@@ -87,11 +92,11 @@
                                 </td>
                                 <td class="text-end text-nowrap">
                                     <a href="{{ route('admin.servicios.edit', $servicio) }}"
-                                       class="btn btn-sm btn-outline-primary" title="Editar"
+                                       class="btn btn-outline-primary" title="Editar"
                                        aria-label="Editar {{ $servicio->nombre }}">
                                         <i class="bi bi-pencil" aria-hidden="true"></i>
                                     </a>
-                                    <button type="button" class="btn btn-sm btn-outline-danger" title="Eliminar"
+                                    <button type="button" class="btn btn-outline-danger" title="Eliminar"
                                             aria-label="Eliminar {{ $servicio->nombre }}"
                                             data-bs-toggle="modal" data-bs-target="#modalEliminar"
                                             data-accion="{{ route('admin.servicios.destroy', $servicio) }}"
