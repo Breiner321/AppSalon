@@ -28,8 +28,19 @@ Versiones con las que se desarrolló y probó el proyecto:
 
 - **XAMPP** con PHP 8.2 o superior y MySQL/MariaDB. Las extensiones `pdo_mysql`, `mbstring`, `openssl`
   y `fileinfo` ya vienen activas en XAMPP.
-- **Composer 2** ([getcomposer.org](https://getcomposer.org/download/)).
+- **Composer 2** ([getcomposer.org](https://getcomposer.org/download/)). El instalador para Windows lo agrega al PATH.
 - **Git**.
+
+Antes de instalar, comprueba en una ventana nueva de PowerShell que los tres comandos responden:
+
+```powershell
+php -v
+composer -V
+git --version
+```
+
+Si alguno dice *"no se reconoce como nombre de un cmdlet"*, ese programa no está en el PATH. Reinstálalo con su
+instalador oficial o agrega su carpeta a la variable de entorno `Path` (para PHP de XAMPP: `C:\xampp\php`).
 
 ## 4. Instalación (Windows con XAMPP)
 
