@@ -2,17 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\View\View;
+
 /**
  * Panel de administración del salón.
  */
 class AdminController extends Controller
 {
     /**
-     * Página principal del panel de administración.
+     * Página principal del panel de administración. El acceso solo para admin
+     * ya lo controla el middleware 'admin' (A5) en routes/web.php.
      */
-    public function index()
+    public function index(): View
     {
-        // TODO A5: panel de administración (solo usuarios admin)
-        abort(501);
+        return view('admin.index');
     }
 }
