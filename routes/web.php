@@ -17,12 +17,14 @@ Route::get('/', [ServiceController::class, 'catalog'])->name('inicio');
 Route::get('/servicios', [ServiceController::class, 'catalog'])->name('servicios.catalogo');
 
 // Registro e inicio de sesión: solo para visitantes sin sesión.
+// Los POST admiten 5 intentos por minuto y por IP; el sexto responde 429.
+// El tercer parámetro de throttle separa los contadores de login y de registro.
 Route::middleware('guest')->group(function () {
     Route::get('/registro', [AuthController::class, 'showRegister'])->name('registro');
-    Route::post('/registro', [AuthController::class, 'register']);
+    Route::post('/registro', [AuthController::class, 'register'])->middleware('throttle:5,1,registro');
 
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1,login');
 });
 
 // Rutas que requieren sesión iniciada.
