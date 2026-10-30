@@ -1,0 +1,216 @@
+/*
+ * Estilos propios de AppSalon. Paleta y reglas en docs/guia-visual.md.
+ * Bootstrap 5 se carga antes por CDN; aquí solo se ajusta lo necesario.
+ */
+
+:root {
+    --salon-primary: #7B2D5B;
+    --salon-primary-dark: #5E2245;
+    --salon-accent: #E8A0BF;
+    --salon-bg: #FAF6F8;
+    --salon-surface: #FFFFFF;
+    --salon-text: #2B2B2B;
+    --salon-muted: #6C6C6C;
+
+    /* Bootstrap usa el primario del salón en btn-primary, bg-primary, enlaces, etc. */
+    --bs-primary: var(--salon-primary);
+    --bs-primary-rgb: 123, 45, 91;
+    --bs-link-color: var(--salon-primary);
+    --bs-link-color-rgb: 123, 45, 91;
+    --bs-link-hover-color: var(--salon-primary-dark);
+    --bs-link-hover-color-rgb: 94, 34, 69;
+    --bs-body-bg: var(--salon-bg);
+    --bs-body-color: var(--salon-text);
+    --bs-secondary-color: var(--salon-muted);
+}
+
+h1, h2, h3, .navbar-brand {
+    font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-weight: 600;
+}
+
+/* Botón primario: Bootstrap no toma --bs-primary para los botones, se define aquí. */
+.btn-primary {
+    --bs-btn-bg: var(--salon-primary);
+    --bs-btn-border-color: var(--salon-primary);
+    --bs-btn-hover-bg: var(--salon-primary-dark);
+    --bs-btn-hover-border-color: var(--salon-primary-dark);
+    --bs-btn-active-bg: var(--salon-primary-dark);
+    --bs-btn-active-border-color: var(--salon-primary-dark);
+    --bs-btn-disabled-bg: var(--salon-primary);
+    --bs-btn-disabled-border-color: var(--salon-primary);
+    --bs-btn-focus-shadow-rgb: 123, 45, 91;
+}
+
+.btn-outline-primary {
+    --bs-btn-color: var(--salon-primary);
+    --bs-btn-border-color: var(--salon-primary);
+    --bs-btn-hover-bg: var(--salon-primary);
+    --bs-btn-hover-border-color: var(--salon-primary);
+    --bs-btn-active-bg: var(--salon-primary-dark);
+    --bs-btn-active-border-color: var(--salon-primary-dark);
+    --bs-btn-focus-shadow-rgb: 123, 45, 91;
+}
+
+.form-control:focus,
+.form-check-input:focus {
+    border-color: var(--salon-accent);
+    box-shadow: 0 0 0 0.25rem rgba(123, 45, 91, 0.2);
+}
+
+.form-check-input:checked {
+    background-color: var(--salon-primary);
+    border-color: var(--salon-primary);
+}
+
+/* Tarjeta para formularios de login y registro. */
+.card-form {
+    max-width: 32rem;
+    margin-inline: auto;
+    background-color: var(--salon-surface);
+    border: 0;
+    box-shadow: 0 0.5rem 1.5rem rgba(43, 43, 43, 0.08);
+}
+
+/* Variante más ancha para el formulario de servicios del panel. */
+.card-form-amplia {
+    max-width: 44rem;
+}
+
+/* Contenedor de las tablas del panel. */
+.card-tabla {
+    background-color: var(--salon-surface);
+    border: 0;
+    box-shadow: 0 0.25rem 1rem rgba(43, 43, 43, 0.06);
+    overflow: hidden;
+}
+
+.card-tabla thead th {
+    color: var(--salon-muted);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.pagination {
+    --bs-pagination-active-bg: var(--salon-primary);
+    --bs-pagination-active-border-color: var(--salon-primary);
+    --bs-pagination-color: var(--salon-primary);
+    --bs-pagination-hover-color: var(--salon-primary-dark);
+    --bs-pagination-focus-color: var(--salon-primary-dark);
+    --bs-pagination-focus-box-shadow: 0 0 0 0.25rem rgba(123, 45, 91, 0.2);
+}
+
+/* Tarjetas de conteo del panel de administración. */
+.card-estadistica {
+    background-color: var(--salon-surface);
+    border: 0;
+    box-shadow: 0 0.25rem 1rem rgba(43, 43, 43, 0.06);
+}
+
+.icono-estadistica {
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.numero-estadistica {
+    font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 2rem;
+    font-weight: 600;
+    line-height: 1.1;
+}
+
+/* Tarjetas del catálogo de servicios. */
+.card-servicio {
+    background-color: var(--salon-surface);
+    border: 0;
+    border-top: 4px solid var(--salon-accent);
+    box-shadow: 0 0.25rem 1rem rgba(43, 43, 43, 0.06);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card-servicio:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1.5rem rgba(43, 43, 43, 0.1);
+}
+
+/* Llamada a registrarse que ven los invitados en el catálogo. */
+.cta-registro {
+    background-color: var(--salon-surface);
+    border-left: 4px solid var(--salon-primary);
+    border-radius: var(--bs-border-radius);
+}
+
+.precio {
+    color: var(--salon-primary-dark);
+    font-weight: 600;
+}
+
+/* Menú del usuario: el ítem activo del dropdown usa el primario del salón. */
+.dropdown-menu {
+    --bs-dropdown-link-active-bg: var(--salon-primary);
+}
+
+.footer-salon {
+    background-color: var(--salon-surface);
+    color: var(--salon-muted);
+    border-top: 1px solid rgba(123, 45, 91, 0.1);
+}
+
+/*
+ * Áreas táctiles de al menos 44 px de alto (U8), en todos los tamaños de pantalla.
+ * Se usa flex para centrar el texto y el ícono sin cambiar el aspecto de Bootstrap.
+ */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    min-height: 2.75rem;
+}
+
+.navbar-toggler,
+.page-link {
+    min-height: 2.75rem;
+    min-width: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.navbar .nav-link,
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: 2.75rem;
+}
+
+/* El botón Cerrar de Bootstrap mide 1em; el relleno lo lleva a 44 px sin agrandar la X. */
+.modal-header .btn-close {
+    box-sizing: content-box;
+    padding: 0.875rem;
+    margin: -0.5rem -0.5rem -0.5rem auto;
+}
+
+/* Listado del panel en móvil: una tarjeta por servicio en lugar de la tabla. */
+.tarjeta-servicio-movil {
+    background-color: var(--salon-surface);
+    border: 0;
+    border-left: 4px solid var(--salon-accent);
+    box-shadow: 0 0.25rem 1rem rgba(43, 43, 43, 0.06);
+}
+
+/* Campos obligatorios (U9): asterisco rojo después del label. */
+.form-label.requerido::after {
+    content: " *";
+    color: var(--bs-danger);
+}
+
+/* Estado vacío del catálogo y del listado del panel. */
+.estado-vacio {
+    background-color: var(--salon-surface);
+    border: 2px dashed rgba(123, 45, 91, 0.2);
+    border-radius: var(--bs-border-radius-lg);
+}

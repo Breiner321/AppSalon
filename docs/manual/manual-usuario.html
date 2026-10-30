@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<!--
+  Manual de usuario de AppSalon (T8). HTML autónomo pensado para imprimirse en A4:
+  cada <section> empieza en una página nueva. Las imágenes salen de docs/capturas (U10).
+  Para generar el PDF, ver docs/manual/LEEME.md.
+-->
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Manual de usuario · AppSalon</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+
+        :root {
+            --primario: #7B2D5B;
+            --primario-oscuro: #5E2245;
+            --acento: #E8A0BF;
+            --fondo: #FAF6F8;
+            --texto: #2B2B2B;
+            --suave: #6C6C6C;
+        }
+
+        * { box-sizing: border-box; }
+
+        html {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        body {
+            margin: 0;
+            color: var(--texto);
+            font: 10pt/1.45 "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+        }
+
+        /* En pantalla se simula la hoja A4; al imprimir manda @page. */
+        @media screen {
+            body { background: #ddd; padding: 1cm 0; }
+            section { width: 21cm; min-height: 29.7cm; margin: 0 auto 1cm; padding: 2cm; background: #fff; }
+        }
+
+        section + section { page-break-before: always; break-before: page; }
+
+        h1, h2, h3 { color: var(--primario); margin: 0 0 0.3cm; line-height: 1.2; }
+        h1 { font-size: 26pt; }
+        h2 { font-size: 16pt; border-bottom: 2px solid var(--acento); padding-bottom: 0.15cm; margin-bottom: 0.35cm; }
+        h3 { font-size: 11.5pt; margin-top: 0.35cm; margin-bottom: 0.15cm; }
+        p { margin: 0 0 0.2cm; }
+        ol, ul { margin: 0 0 0.2cm; padding-left: 0.55cm; }
+        li { margin-bottom: 0.05cm; }
+        code, kbd { font: 9pt Consolas, "Courier New", monospace; background: var(--fondo); padding: 0 3px; border-radius: 3px; }
+
+        .seccion-num {
+            display: inline-block; min-width: 0.75cm; padding: 0 0.15cm; margin-right: 0.2cm;
+            background: var(--primario); color: #fff; border-radius: 4px; text-align: center;
+        }
+
+        /* Capturas */
+        figure { margin: 0; }
+        figure img { display: block; width: 100%; border: 1px solid #d9cfd5; border-radius: 4px; }
+        figcaption { font-size: 8pt; color: var(--suave); margin-top: 0.08cm; }
+        .fila { display: flex; gap: 0.4cm; align-items: flex-start; }
+        .fila > * { flex: 1 1 0; min-width: 0; }
+        .fila + .fila, .fila + h3, h3 + .fila { margin-top: 0.15cm; }
+        .pendiente {
+            display: flex; align-items: center; justify-content: center; aspect-ratio: 16 / 10;
+            border: 2px dashed var(--primario); color: var(--primario); font-weight: 600; text-align: center;
+        }
+
+        .nota {
+            background: var(--fondo); border-left: 4px solid var(--primario);
+            padding: 0.2cm 0.3cm; margin: 0.2cm 0; font-size: 9.5pt;
+        }
+
+        table { width: 100%; border-collapse: collapse; font-size: 9pt; margin: 0.15cm 0 0.25cm; }
+        th, td { text-align: left; vertical-align: top; padding: 0.11cm 0.18cm; border-bottom: 1px solid #e6dce2; }
+        th { background: var(--fondo); color: var(--primario-oscuro); }
+
+        /* Portada */
+        .portada { display: flex; flex-direction: column; }
+        .marca { font-size: 40pt; font-weight: 700; color: var(--primario); line-height: 1; }
+        .marca span { color: var(--acento); }
+        .subtitulo { font-size: 14pt; color: var(--suave); margin: 0.2cm 0 0.6cm; }
+        .portada .fila figure { flex: 2.4 1 0; }
+        .portada .fila figure.movil { flex: 1 1 0; }
+
+        .faq dt { font-weight: 600; color: var(--primario-oscuro); margin-top: 0.22cm; }
+        .faq dd { margin: 0.05cm 0 0 0; }
+
+        .pie { margin-top: 0.4cm; font-size: 8pt; color: var(--suave); }
+    </style>
+</head>
+<body>
+
+<!-- 1. Portada y acceso al sistema -->
+<section class="portada">
+    <div class="marca">✂ App<span>Salon</span></div>
+    <p class="subtitulo">Manual de usuario · Sistema de citas para salón de belleza</p>
+
+    <div class="fila">
+        <figure>
+            <img src="../capturas/01-catalogo.png" alt="Catálogo de servicios en escritorio">
+            <figcaption>Catálogo de servicios en computador.</figcaption>
+        </figure>
+        <figure class="movil">
+            <img src="../capturas/11-movil-catalogo.png" alt="Catálogo de servicios en el celular">
+            <figcaption>El mismo catálogo en el celular.</figcaption>
+        </figure>
+    </div>
+
+    <h2 style="margin-top:0.5cm"><span class="seccion-num">1</span>Acceso al sistema</h2>
+    <p>AppSalon funciona en el navegador (Chrome, Edge o Firefox), en computador, tableta o celular. No hay que instalar nada.</p>
+    <ol>
+        <li>Abre el navegador y escribe la dirección del salón. En el equipo de la demo es <code>http://127.0.0.1:8000</code>.</li>
+        <li>Verás el <strong>catálogo de servicios</strong>. Se puede consultar sin cuenta.</li>
+        <li>Usa el menú superior: <strong>Servicios</strong>, <strong>Iniciar sesión</strong> o <strong>Registrarse</strong>.
+            En el celular, el menú se abre con el botón <strong>☰</strong>.</li>
+    </ol>
+
+    <h3>Tipos de usuario</h3>
+    <table>
+        <tr><th>Rol</th><th>Qué puede hacer</th><th>Cuenta de prueba</th></tr>
+        <tr><td>Visitante</td><td>Ver el catálogo y crear una cuenta.</td><td>No necesita</td></tr>
+        <tr><td>Cliente</td><td>Iniciar sesión y ver el catálogo. La reserva de citas llega en la siguiente versión.</td><td><code>cliente@appsalon.com</code> / <code>Cliente123</code></td></tr>
+        <tr><td>Administrador</td><td>Todo lo anterior, el panel y la gestión de servicios.</td><td><code>admin@appsalon.com</code> / <code>Admin123</code></td></tr>
+    </table>
+    <p class="pie">AppSalon · Entrega intermedia (semana 11) · Laravel 12, MySQL y Bootstrap 5.</p>
+</section>
+
+<!-- 2. Cliente -->
+<section>
+    <h2><span class="seccion-num">2</span>Cliente: registro, cuenta, inicio de sesión y catálogo</h2>
+
+    <h3>Crear una cuenta</h3>
+    <ol>
+        <li>En el menú, pulsa <strong>Registrarse</strong>.</li>
+        <li>Completa los campos con <span style="color:#dc3545">*</span>: nombre, apellido, correo, contraseña (mínimo 6 caracteres) y su confirmación.
+            El teléfono es opcional y lleva 10 dígitos sin espacios.</li>
+        <li>Pulsa <strong>Crear cuenta</strong>. Si algo está mal, el campo se marca en rojo con el motivo; lo que escribiste se conserva, salvo las contraseñas.</li>
+    </ol>
+    <div class="fila">
+        <figure><img src="../capturas/02-registro.png" alt="Formulario de registro"><figcaption>Formulario de registro.</figcaption></figure>
+        <figure><img src="../capturas/03-registro-errores.png" alt="Registro con errores"><figcaption>Errores marcados en cada campo.</figcaption></figure>
+    </div>
+
+    <h3>Confirmación de la cuenta</h3>
+    <p>Al terminar el registro verás el mensaje verde <em>«Revisa tu correo para confirmar la cuenta»</em>.
+        Abre el correo de AppSalon y pulsa <strong>Confirmar mi cuenta</strong>: verás <em>«Cuenta confirmada»</em> y ya podrás iniciar sesión.
+        <strong>Hasta confirmarla no puedes entrar</strong>, aunque la contraseña sea correcta. Cada enlace sirve una sola vez.</p>
+
+    <h3>Iniciar y cerrar sesión</h3>
+    <div class="fila">
+        <div>
+            <ol>
+                <li>Pulsa <strong>Iniciar sesión</strong>, escribe tu correo y tu contraseña, y confirma.</li>
+                <li>Verás <em>«Bienvenido, &lt;tu nombre&gt;»</em> y el catálogo. Tu nombre aparece arriba a la derecha.</li>
+                <li>Para salir, abre el menú con tu nombre y pulsa <strong>Cerrar sesión</strong>. Hazlo siempre en equipos compartidos.</li>
+            </ol>
+            <h3>Consultar el catálogo</h3>
+            <p>Cada tarjeta muestra el servicio, una descripción, la duración en minutos (<strong>⏱</strong>) y el precio.
+                Solo aparecen los servicios activos. En el celular las tarjetas se ven una debajo de otra.</p>
+        </div>
+        <figure><img src="../capturas/04-login.png" alt="Inicio de sesión"><figcaption>Pantalla de inicio de sesión.</figcaption></figure>
+    </div>
+</section>
+
+<!-- 3. Administrador -->
+<section>
+    <h2><span class="seccion-num">3</span>Administrador: panel y gestión de servicios</h2>
+    <p>Al iniciar sesión con una cuenta de administrador llegas al <strong>Panel</strong>. En el menú aparecen además
+        <strong>Panel</strong> y <strong>Gestionar servicios</strong>. La ruta de navegación (Panel / Servicios / …) te dice dónde estás.</p>
+
+    <div class="fila">
+        <figure><img src="../capturas/05-panel-admin.png" alt="Panel de administración"><figcaption>Panel: servicios activos, inactivos y usuarios registrados.</figcaption></figure>
+        <figure><img src="../capturas/06-listado-servicios.png" alt="Listado de servicios"><figcaption>Listado: 10 servicios por página, con estado y acciones.</figcaption></figure>
+    </div>
+
+    <div class="fila">
+        <div>
+            <h3>Crear un servicio</h3>
+            <ol>
+                <li>Pulsa <strong>Nuevo servicio</strong> (en el panel o en el listado).</li>
+                <li>Escribe el nombre (máx. 60 caracteres), el precio (de 0 a 999.99) y la duración (de 10 a 480 minutos). La descripción es opcional.</li>
+                <li>Deja <strong>Activo</strong> encendido para que se vea en el catálogo y pulsa <strong>Guardar</strong>.</li>
+            </ol>
+            <h3>Editar un servicio</h3>
+            <ol>
+                <li>En el listado pulsa el lápiz <strong>✎</strong> del servicio.</li>
+                <li>Cambia los datos y pulsa <strong>Guardar</strong>. Para ocultarlo sin borrarlo, apaga <strong>Activo</strong>.</li>
+            </ol>
+        </div>
+        <figure><img src="../capturas/07-crear-servicio.png" alt="Formulario de nuevo servicio"><figcaption>Formulario de nuevo servicio.</figcaption></figure>
+    </div>
+
+    <div class="fila">
+        <figure><img src="../capturas/08-editar-servicio.png" alt="Editar servicio"><figcaption>Edición con los datos actuales.</figcaption></figure>
+        <div>
+            <h3>Eliminar un servicio</h3>
+            <ol>
+                <li>Pulsa la papelera <strong>🗑</strong> del servicio.</li>
+                <li>Lee la confirmación y pulsa <strong>Eliminar</strong>, o <strong>Cancelar</strong> para no hacer nada.</li>
+            </ol>
+            <div class="nota">Eliminar no se puede deshacer y también quita el servicio de las citas que lo incluyan.
+                Si solo quieres que deje de verse, desactívalo.</div>
+        </div>
+        <figure><img src="../capturas/09-confirmar-eliminar.png" alt="Confirmar eliminación"><figcaption>Ventana de confirmación.</figcaption></figure>
+    </div>
+</section>
+
+<!-- 4. Mensajes y errores comunes -->
+<section>
+    <h2><span class="seccion-num">4</span>Mensajes y errores comunes</h2>
+    <p>Los avisos aparecen arriba de la página y se cierran solos a los 5 segundos (o con la <strong>×</strong>):
+        <strong style="color:#198754">verde</strong> cuando algo salió bien, <strong style="color:#dc3545">rojo</strong> cuando falló
+        y <strong style="color:#0d6efd">azul</strong> para información.</p>
+
+    <table>
+        <tr><th style="width:38%">Mensaje</th><th>Qué significa y qué hacer</th></tr>
+        <tr><td>Campo en rojo con un texto debajo</td><td>Ese dato no es válido. Corrígelo según el texto y vuelve a enviar.</td></tr>
+        <tr><td>«Credenciales incorrectas»</td><td>El correo o la contraseña no coinciden. Revisa mayúsculas y que el correo sea el del registro.</td></tr>
+        <tr><td>«Ya existe una cuenta con ese correo electrónico.»</td><td>Ese correo ya está registrado: inicia sesión en lugar de registrarte.</td></tr>
+        <tr><td>«Confirma tu cuenta desde el enlace enviado a tu correo»</td><td>Aún no confirmaste la cuenta. Busca el correo de AppSalon (revisa también el correo no deseado) y abre el enlace.</td></tr>
+        <tr><td>«Token no válido»</td><td>El enlace de confirmación está incompleto o ya se usó. Si tu cuenta ya está confirmada, solo inicia sesión.</td></tr>
+        <tr><td>«Demasiados intentos»</td><td>Hubo más de 5 intentos de inicio de sesión o registro en un minuto. Espera un minuto.</td></tr>
+        <tr><td>«No tienes permiso para ver esta página» (403)</td><td>Entraste a una sección solo para administradores con una cuenta de cliente.</td></tr>
+        <tr><td>«No encontramos esta página» (404)</td><td>La dirección está mal escrita o el servicio ya fue eliminado.</td></tr>
+        <tr><td>«La página expiró» (419)</td><td>El formulario estuvo abierto mucho tiempo. Recarga la página y envíalo otra vez.</td></tr>
+        <tr><td>«No pudimos completar la solicitud»</td><td>Abriste una dirección que no se usa así (por ejemplo, escribir <code>/logout</code> en el navegador). Usa los botones del sitio.</td></tr>
+        <tr><td>«Algo salió mal de nuestro lado» (500)</td><td>Falla del servidor. Intenta de nuevo en unos minutos; si sigue, avisa al administrador.</td></tr>
+        <tr><td>«No pudimos guardar/actualizar/eliminar el servicio»</td><td>La base de datos no respondió. Tus datos quedan en el formulario: inténtalo de nuevo.</td></tr>
+    </table>
+
+    <div class="fila">
+        <figure><img src="../capturas/10-acceso-denegado.png" alt="Acceso denegado"><figcaption>Página de acceso denegado (403) vista por un cliente.</figcaption></figure>
+        <div>
+            <h3>Antes de pedir ayuda</h3>
+            <ul>
+                <li>Recarga la página (<kbd>F5</kbd>).</li>
+                <li>Revisa que la sesión siga abierta: tu nombre debe verse arriba a la derecha.</li>
+                <li>Cierra sesión y vuelve a entrar.</li>
+                <li>Prueba en otro navegador o en una ventana privada.</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- 5. Preguntas frecuentes -->
+<section>
+    <h2><span class="seccion-num">5</span>Preguntas frecuentes</h2>
+    <dl class="faq">
+        <dt>¿Necesito una cuenta para ver los servicios y precios?</dt>
+        <dd>No. El catálogo es público. La cuenta servirá para reservar citas.</dd>
+
+        <dt>¿Ya puedo reservar una cita?</dt>
+        <dd>Todavía no. La reserva con fecha, hora y varios servicios llega en la entrega final.</dd>
+
+        <dt>Olvidé mi contraseña, ¿cómo la recupero?</dt>
+        <dd>En esta versión aún no hay recuperación por correo. Pide al administrador del salón que te ayude.</dd>
+
+        <dt>¿Por qué el teléfono me marca error?</dt>
+        <dd>Debe tener exactamente 10 dígitos, sin espacios, guiones ni indicativo (por ejemplo, <code>3001234567</code>). También puedes dejarlo vacío.</dd>
+
+        <dt>¿Cómo convierto a un cliente en administrador?</dt>
+        <dd>Por seguridad no se hace desde la aplicación: el formulario de registro ignora ese dato. Lo cambia el encargado técnico en la base de datos (campo <code>admin</code> de la tabla <code>usuarios</code>).</dd>
+
+        <dt>Desactivé un servicio, ¿se perdió?</dt>
+        <dd>No. Sigue en el listado del panel con la etiqueta <em>Inactivo</em> y solo deja de verse en el catálogo. Vuelve a activarlo desde <strong>Editar</strong>.</dd>
+
+        <dt>¿Cuál es el precio máximo de un servicio?</dt>
+        <dd>$999.99. La duración va de 10 a 480 minutos (8 horas).</dd>
+
+        <dt>¿Funciona en el celular?</dt>
+        <dd>Sí. Todas las pantallas se adaptan a celular, tableta y computador. En el celular, el menú se abre con <strong>☰</strong> y el listado de servicios del panel se ve en tarjetas.</dd>
+
+        <dt>¿Mis datos están seguros?</dt>
+        <dd>Las contraseñas se guardan cifradas (bcrypt), todos los formularios están protegidos contra envíos falsos (CSRF),
+            el inicio de sesión limita los intentos y las secciones de administración comprueban el rol en cada visita.</dd>
+    </dl>
+    <p class="pie">¿Algo no funciona como dice este manual? Escribe al equipo de desarrollo con la dirección de la página, lo que hiciste y el mensaje que viste.</p>
+</section>
+
+</body>
+</html>
