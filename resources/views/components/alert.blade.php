@@ -1,5 +1,6 @@
 {{-- <x-alert />: muestra los mensajes flash de la sesión como alertas Bootstrap descartables.
-     Claves admitidas: success, error, warning e info. Se incluye una sola vez, en el layout. --}}
+     Claves admitidas: success (verde), error (rojo), warning (amarillo) e info (azul).
+     Se incluye una sola vez, en el layout, que las cierra solas a los 5 s (data-autocierre). --}}
 @php
     $tipos = [
         'success' => ['clase' => 'success', 'icono' => 'bi-check-circle'],
@@ -11,7 +12,7 @@
 
 @foreach ($tipos as $clave => $tipo)
     @if (session()->has($clave))
-        <div class="alert alert-{{ $tipo['clase'] }} alert-dismissible fade show d-flex align-items-start gap-2" role="alert">
+        <div class="alert alert-{{ $tipo['clase'] }} alert-dismissible fade show d-flex align-items-start gap-2" role="alert" data-autocierre>
             <i class="bi {{ $tipo['icono'] }}" aria-hidden="true"></i>
             <div>{{ session($clave) }}</div>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>

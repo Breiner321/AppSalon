@@ -102,6 +102,25 @@ h1, h2, h3, .navbar-brand {
     --bs-pagination-focus-box-shadow: 0 0 0 0.25rem rgba(123, 45, 91, 0.2);
 }
 
+/* Tarjetas de conteo del panel de administración. */
+.card-estadistica {
+    background-color: var(--salon-surface);
+    border: 0;
+    box-shadow: 0 0.25rem 1rem rgba(43, 43, 43, 0.06);
+}
+
+.icono-estadistica {
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.numero-estadistica {
+    font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 2rem;
+    font-weight: 600;
+    line-height: 1.1;
+}
+
 /* Tarjetas del catálogo de servicios. */
 .card-servicio {
     background-color: var(--salon-surface);
@@ -128,13 +147,70 @@ h1, h2, h3, .navbar-brand {
     font-weight: 600;
 }
 
-/* El botón Cerrar sesión es un <form>; se alinea con los enlaces del navbar. */
-.navbar .btn-link.nav-link {
-    text-decoration: none;
+/* Menú del usuario: el ítem activo del dropdown usa el primario del salón. */
+.dropdown-menu {
+    --bs-dropdown-link-active-bg: var(--salon-primary);
 }
 
 .footer-salon {
     background-color: var(--salon-surface);
     color: var(--salon-muted);
     border-top: 1px solid rgba(123, 45, 91, 0.1);
+}
+
+/*
+ * Áreas táctiles de al menos 44 px de alto (U8), en todos los tamaños de pantalla.
+ * Se usa flex para centrar el texto y el ícono sin cambiar el aspecto de Bootstrap.
+ */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    min-height: 2.75rem;
+}
+
+.navbar-toggler,
+.page-link {
+    min-height: 2.75rem;
+    min-width: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.navbar .nav-link,
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: 2.75rem;
+}
+
+/* El botón Cerrar de Bootstrap mide 1em; el relleno lo lleva a 44 px sin agrandar la X. */
+.modal-header .btn-close {
+    box-sizing: content-box;
+    padding: 0.875rem;
+    margin: -0.5rem -0.5rem -0.5rem auto;
+}
+
+/* Listado del panel en móvil: una tarjeta por servicio en lugar de la tabla. */
+.tarjeta-servicio-movil {
+    background-color: var(--salon-surface);
+    border: 0;
+    border-left: 4px solid var(--salon-accent);
+    box-shadow: 0 0.25rem 1rem rgba(43, 43, 43, 0.06);
+}
+
+/* Campos obligatorios (U9): asterisco rojo después del label. */
+.form-label.requerido::after {
+    content: " *";
+    color: var(--bs-danger);
+}
+
+/* Estado vacío del catálogo y del listado del panel. */
+.estado-vacio {
+    background-color: var(--salon-surface);
+    border: 2px dashed rgba(123, 45, 91, 0.2);
+    border-radius: var(--bs-border-radius-lg);
 }
