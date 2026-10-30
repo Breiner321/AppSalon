@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Service;
 use Illuminate\View\View;
 
 /**
@@ -11,11 +12,13 @@ class ServiceController extends Controller
 {
     /**
      * Catálogo público de servicios (rutas / y /servicios).
+     * Solo muestra los servicios activos, en orden alfabético.
      */
     public function catalog(): View
     {
-        // TODO U4: cargar los servicios activos y mostrarlos en tarjetas
-        return view('services.index');
+        $servicios = Service::where('activo', true)->orderBy('nombre')->get();
+
+        return view('services.index', compact('servicios'));
     }
 
     /**
