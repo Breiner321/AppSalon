@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Service;
 use Illuminate\View\View;
 
 /**
@@ -15,6 +16,9 @@ class AdminController extends Controller
      */
     public function index(): View
     {
-        return view('admin.index');
+        return view('admin.index', [
+            'totalServicios' => Service::count(),
+            'serviciosActivos' => Service::where('activo', true)->count(),
+        ]);
     }
 }
