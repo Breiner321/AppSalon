@@ -28,11 +28,12 @@ Route::middleware('guest')->group(function () {
 // Rutas que requieren sesión iniciada.
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+});
 
-    // TODO A5: agregar middleware 'admin'
+// Panel de administración: sesión iniciada y usuario admin (si no, 403).
+Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
 
-    // TODO A5: agregar middleware 'admin'
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('servicios', ServiceController::class)->except('show');
     });
