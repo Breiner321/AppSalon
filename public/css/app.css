@@ -157,3 +157,47 @@ h1, h2, h3, .navbar-brand {
     color: var(--salon-muted);
     border-top: 1px solid rgba(123, 45, 91, 0.1);
 }
+
+/*
+ * Áreas táctiles de al menos 44 px de alto (U8), en todos los tamaños de pantalla.
+ * Se usa flex para centrar el texto y el ícono sin cambiar el aspecto de Bootstrap.
+ */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    min-height: 2.75rem;
+}
+
+.navbar-toggler,
+.page-link {
+    min-height: 2.75rem;
+    min-width: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.navbar .nav-link,
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: 2.75rem;
+}
+
+/* El botón Cerrar de Bootstrap mide 1em; el relleno lo lleva a 44 px sin agrandar la X. */
+.modal-header .btn-close {
+    box-sizing: content-box;
+    padding: 0.875rem;
+    margin: -0.5rem -0.5rem -0.5rem auto;
+}
+
+/* Listado del panel en móvil: una tarjeta por servicio en lugar de la tabla. */
+.tarjeta-servicio-movil {
+    background-color: var(--salon-surface);
+    border: 0;
+    border-left: 4px solid var(--salon-accent);
+    box-shadow: 0 0.25rem 1rem rgba(43, 43, 43, 0.06);
+}
