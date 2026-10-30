@@ -72,6 +72,11 @@ h1, h2, h3, .navbar-brand {
     box-shadow: 0 0.5rem 1.5rem rgba(43, 43, 43, 0.08);
 }
 
+/* Variante más ancha para el formulario de servicios del panel. */
+.card-form-amplia {
+    max-width: 44rem;
+}
+
 /* Tarjetas del catálogo de servicios. */
 .card-servicio {
     background-color: var(--salon-surface);

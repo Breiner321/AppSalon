@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ServiceRequest;
 use App\Models\Service;
+use App\Support\HandlesDatabaseErrors;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
 /**
@@ -10,6 +13,7 @@ use Illuminate\View\View;
  */
 class ServiceController extends Controller
 {
+    use HandlesDatabaseErrors;
     /**
      * Catálogo público de servicios (rutas / y /servicios).
      * Solo muestra los servicios activos, en orden alfabético.
@@ -31,21 +35,34 @@ class ServiceController extends Controller
     }
 
     /**
-     * Formulario para crear un servicio.
+     * Formulario para crear un servicio. Se usa la misma vista que para editar;
+     * el servicio nuevo llega activo por defecto.
      */
-    public function create()
+    public function create(): View
     {
-        // TODO U5: formulario de alta
-        abort(501);
+        $servicio = new Service(['activo' => true]);
+
+        return view('admin.servicios.form', compact('servicio'));
     }
 
     /**
      * Guarda un servicio nuevo.
      */
-    public function store()
+    public function store(ServiceRequest $request): RedirectResponse
     {
-        // TODO U6: validar y crear el servicio
-        abort(501);
+        $resultado = $this->runSafely(
+            fn () => Service::create($request->validated()),
+            'No pudimos guardar el servicio. Intenta de nuevo.'
+        );
+
+        // Si falló, runSafely ya preparó la redirección con el mensaje de error.
+        if ($resultado instanceof RedirectResponse) {
+            return $resultado;
+        }
+
+        return redirect()
+            ->route('admin.servicios.index')
+            ->with('success', 'Servicio creado');
     }
 
     /**
