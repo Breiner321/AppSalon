@@ -1,4 +1,4 @@
-{{-- Formulario de inicio de sesión. La lógica de autenticación llega en A4. --}}
+{{-- Formulario de inicio de sesión (A4). Lo valida App\Http\Requests\LoginRequest. --}}
 @extends('layouts.app')
 
 @section('title', 'Iniciar sesión')
@@ -12,7 +12,7 @@
                 @csrf
 
                 <div class="mb-3">
-                    <label for="email" class="form-label">Correo electrónico</label>
+                    <label for="email" class="form-label requerido">Correo electrónico</label>
                     <input type="email" name="email" id="email" maxlength="30" required autofocus
                            autocomplete="email"
                            class="form-control @error('email') is-invalid @enderror"
@@ -21,7 +21,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="password" class="form-label">Contraseña</label>
+                    <label for="password" class="form-label requerido">Contraseña</label>
                     <input type="password" name="password" id="password" required
                            autocomplete="current-password"
                            class="form-control @error('password') is-invalid @enderror">

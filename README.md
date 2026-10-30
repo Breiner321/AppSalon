@@ -1,59 +1,196 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# ✂ AppSalon
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistema web de gestión de citas para un salón de belleza. Los visitantes consultan el catálogo de servicios,
+los clientes se registran e inician sesión y los administradores gestionan los servicios del salón.
 
-## About Laravel
+> **Estado:** entrega intermedia (semana 11). La reserva de citas, la API, los reportes y la confirmación
+> por correo corresponden a la entrega final (semana 16). Ver [Pendiente para la entrega final](#pendiente-para-la-entrega-final).
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+![Catálogo de servicios](docs/capturas/01-catalogo.png)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Funcionalidades implementadas
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Autenticación y seguridad
+- **Registro de clientes** con validación en el servidor: nombre y apellido obligatorios, correo válido y único,
+  contraseña de al menos 6 caracteres con confirmación y teléfono opcional de 10 dígitos.
+- **Inicio y cierre de sesión.** El inicio regenera la sesión y el cierre la invalida y regenera el token CSRF.
+  Cada rol llega a su página: el administrador al panel y el cliente al catálogo.
+- **Contraseñas con bcrypt**, nunca en texto plano.
+- **Roles:** el middleware `admin` protege `/admin` y todo el CRUD de servicios; un cliente recibe 403.
+- **Protección CSRF** en todos los formularios y **escape XSS** con `{{ }}` en todas las vistas.
+- **Límite de intentos:** 5 por minuto en el login y en el registro; al sexto se responde 429.
+- Detalle de cada requisito y su prueba en [docs/seguridad.md](docs/seguridad.md).
 
-## Learning Laravel
+### Servicios
+- **Catálogo público** (`/` y `/servicios`) con tarjetas de los servicios activos: nombre, descripción, duración y precio.
+- **CRUD de servicios para administradores** (`/admin/servicios`): listado paginado, crear, editar,
+  activar o desactivar y eliminar con una ventana de confirmación.
+- **Validación** con `ServiceRequest`: nombre de hasta 60 caracteres, precio de 0 a 999.99, duración de 10 a 480 minutos
+  y descripción de hasta 500 caracteres.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### Administración
+- **Panel** (`/admin`) con el número de servicios activos, servicios inactivos y usuarios registrados, y accesos rápidos.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Interfaz
+- **Diseño responsive** revisado a 360, 768 y 1280 px: sin scroll horizontal y con botones de al menos 44 px.
+  En el celular, el listado del panel se ve en tarjetas ([docs/responsive.md](docs/responsive.md)).
+- **Navegación por rol:** el menú cambia para invitados, clientes y administradores, y marca la página activa.
+- **Validación visual:** campos en rojo con su mensaje, asterisco en los obligatorios y datos conservados al fallar.
+- **Mensajes de estado** verdes, rojos o azules que se cierran solos a los 5 segundos.
+- **Todo en español**, incluidas las 109 reglas de validación y las páginas de error 403, 404, 419, 429, 500 y genéricas.
 
-## Laravel Sponsors
+### Base de datos
+- Tablas `usuarios`, `servicios`, `citas` y `citasServicios` con claves foráneas e integridad referencial.
+  Si se borra un usuario, sus citas quedan con `usuarioId` en NULL; si se borra una cita o un servicio, sus filas
+  de `citasServicios` se borran en cascada.
+- Datos de prueba: 2 usuarios, 10 servicios y 2 citas con sus servicios.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Tecnologías
 
-### Premium Partners
+| Capa | Tecnología |
+|---|---|
+| Lenguaje y framework | PHP 8.2+ y **Laravel 12** (Eloquent, Blade, Form Requests, middleware) |
+| Base de datos | **MySQL / MariaDB** (XAMPP) |
+| Interfaz | **Bootstrap 5.3** y Bootstrap Icons por CDN, fuente Poppins. Sin Node ni Vite |
+| Pruebas | PHPUnit 11 (54 pruebas de funcionalidad) |
+| Herramientas | Composer, Git y GitHub, phpMyAdmin |
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## Requisitos
 
-## Contributing
+- **XAMPP** con PHP 8.2 o superior y MySQL/MariaDB, con las extensiones `pdo_mysql`, `mbstring`, `openssl` y `fileinfo`
+  (vienen activas en XAMPP).
+- **Composer** 2.
+- **Git**.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Instalación
 
-## Code of Conduct
+1. **Clonar el repositorio**
+   ```bash
+   git clone https://github.com/Breiner321/AppSalon.git
+   cd AppSalon
+   ```
+2. **Instalar las dependencias de PHP**
+   ```bash
+   composer install
+   ```
+3. **Crear el archivo de configuración** a partir del ejemplo y generar la clave de la aplicación
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+   En Windows (PowerShell) usa `Copy-Item .env.example .env`. Los valores por defecto ya sirven para XAMPP:
+   base `appsalon_mvc_php`, usuario `root` sin contraseña, idioma `es`.
+4. **Iniciar MySQL** desde el panel de control de XAMPP.
+5. **Crear la base de datos con los datos de prueba.** Elige una de las dos opciones:
+   - **Con Laravel (recomendado):** crea la base vacía y corre las migraciones con los seeders.
+     ```bash
+     C:\xampp\mysql\bin\mysql.exe -u root -e "CREATE DATABASE appsalon_mvc_php CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+     php artisan migrate --seed
+     ```
+     También puedes crear la base desde phpMyAdmin.
+   - **Con el script SQL:** importa [`database/appsalon_mvc_php.sql`](database/appsalon_mvc_php.sql) desde phpMyAdmin
+     (pestaña *Importar*) o con
+     `C:\xampp\mysql\bin\mysql.exe -u root < database/appsalon_mvc_php.sql`.
+     El script borra y vuelve a crear la base.
+6. **Levantar el servidor**
+   ```bash
+   php artisan serve
+   ```
+   Abre **http://127.0.0.1:8000**.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Usuarios de prueba
 
-## Security Vulnerabilities
+| Rol | Correo | Contraseña |
+|---|---|---|
+| Administrador | `admin@appsalon.com` | `Admin123` |
+| Cliente | `cliente@appsalon.com` | `Cliente123` |
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Los crea `database/seeders/UserSeeder.php` y también vienen en el script SQL. También puedes registrar clientes nuevos en `/registro`.
 
-## License
+## Pruebas
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Las pruebas usan una base aparte, `appsalon_mvc_php_test` (ver `phpunit.xml`). Créala una vez y corre las pruebas:
+
+```bash
+C:\xampp\mysql\bin\mysql.exe -u root -e "CREATE DATABASE appsalon_mvc_php_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+php artisan test
+```
+
+Herramientas de revisión de la interfaz (requieren el servidor corriendo y Chrome instalado):
+
+```bash
+node docs/capturas/herramienta/auditar-responsive.mjs
+node docs/capturas/herramienta/buscar-ingles.mjs
+```
+
+## Base de datos
+
+| Tabla | Campos principales |
+|---|---|
+| `usuarios` | id, nombre, apellido, email (único), password, telefono, admin, confirmado, token |
+| `servicios` | id, nombre, precio, descripcion, duracion, activo |
+| `citas` | id, fecha, hora, usuarioId → usuarios, total, estado |
+| `citasServicios` | id, citaId → citas, servicioId → servicios |
+
+La base se define en las migraciones (`database/migrations`) y los datos de prueba en los seeders (`database/seeders`).
+El script `database/appsalon_mvc_php.sql` es un volcado de esa misma base. Para regenerarlo después de cambiar
+las migraciones:
+
+```bash
+php artisan migrate:fresh --seed
+C:\xampp\mysql\bin\mysqldump.exe -u root --databases appsalon_mvc_php > database/appsalon_mvc_php.sql
+```
+
+> En Windows, MariaDB guarda los nombres de tabla en minúsculas (`citasservicios`). El script del repositorio usa
+> `citasServicios`, como el modelo, para que funcione también en servidores Linux. Si lo regeneras, corrige ese nombre.
+
+## Estructura del proyecto
+
+```
+app/
+├── Http/Controllers/   AuthController, ServiceController, AdminController, AppointmentController
+├── Http/Middleware/    AdminMiddleware (alias 'admin')
+├── Http/Requests/      RegisterRequest, LoginRequest, ServiceRequest
+├── Models/             User, Service, Appointment, AppointmentService
+└── Support/            HandlesDatabaseErrors (escrituras seguras con runSafely)
+database/
+├── migrations/         tablas del proyecto y de Laravel
+├── seeders/            UserSeeder, ServiceSeeder, AppointmentSeeder
+└── appsalon_mvc_php.sql
+resources/views/
+├── layouts/            layout principal con la navegación por rol
+├── components/         <x-alert />, <x-form-error />
+├── auth/               registro y login
+├── services/           catálogo público
+├── admin/              panel y CRUD de servicios
+└── errors/             403, 404, 419, 429, 500, 4xx y 5xx
+lang/es/                validación, autenticación, contraseñas y paginación en español
+routes/web.php          rutas web (nombres de ruta = contrato del equipo)
+public/css/app.css      estilos propios sobre Bootstrap
+tests/Feature/          pruebas de registro, login, seguridad, servicios, navegación e interfaz
+docs/                   documentación del proyecto (ver abajo)
+```
+
+## Documentación
+
+| Documento | Contenido |
+|---|---|
+| [Manual de usuario (PDF)](docs/manual/Manual-de-usuario-AppSalon.pdf) | Guía de 5 páginas para clientes y administradores |
+| [docs/seguridad.md](docs/seguridad.md) | Cada requisito de seguridad, cómo se cumple y qué prueba lo verifica |
+| [docs/convenciones.md](docs/convenciones.md) | Convenciones del backend (`runSafely`, páginas de error) |
+| [docs/guia-visual.md](docs/guia-visual.md) | Paleta, tipografía, componentes y bocetos de pantallas |
+| [docs/responsive.md](docs/responsive.md) | Revisión a 360, 768 y 1280 px y checklist manual |
+| [docs/capturas/LISTA.md](docs/capturas/LISTA.md) | Capturas de pantalla usadas en el manual |
+| [docs/revision-T6a.md](docs/revision-T6a.md) | Revisión cruzada de código entre los desarrolladores |
+
+## Pendiente para la entrega final
+
+- Reserva de citas con calendario, selección de varios servicios y validación de disponibilidad.
+- Confirmación de cuenta por correo y recuperación de contraseña.
+- Panel avanzado: estadísticas, gestión de usuarios y agenda.
+- API REST (`/api/servicios`, `/api/citas`…) con autenticación por token.
+- Reportes con gráficas y exportación a PDF y Excel/CSV.
+
+## Flujo de trabajo
+
+Una rama por tarea (`feature/<código>-<tema>`), pruebas en verde antes de cada commit y merge `--no-ff` a `develop`.
