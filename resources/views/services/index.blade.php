@@ -23,8 +23,10 @@
     @endguest
 
     @if ($servicios->isEmpty())
-        <div class="alert alert-info" role="status">
-            <i class="bi bi-info-circle" aria-hidden="true"></i> Aún no hay servicios disponibles
+        <div class="estado-vacio text-center p-5" role="status">
+            <i class="bi bi-calendar-x display-4 text-primary" aria-hidden="true"></i>
+            <h2 class="h5 mt-3">Aún no hay servicios disponibles</h2>
+            <p class="text-body-secondary mb-0">Vuelve pronto: estamos preparando nuestro catálogo.</p>
         </div>
     @else
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
