@@ -25,6 +25,9 @@ Route::middleware('guest')->group(function () {
 
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1,login');
+
+    // Enlace del correo de confirmación de cuenta (A7).
+    Route::get('/confirmar/{token}', [AuthController::class, 'confirmar'])->name('confirmar');
 });
 
 // Rutas que requieren sesión iniciada.

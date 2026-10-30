@@ -46,7 +46,7 @@ class RegistroTest extends TestCase
         $this->post('/registro', $this->datos())
             ->assertSessionHasNoErrors()
             ->assertRedirect(route('login'))
-            ->assertSessionHas('success', 'Cuenta creada, ya puedes iniciar sesión');
+            ->assertSessionHas('success', 'Revisa tu correo para confirmar la cuenta');
 
         $usuario = User::where('email', 'ana@example.com')->firstOrFail();
 
