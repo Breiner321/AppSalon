@@ -72,6 +72,27 @@ h1, h2, h3, .navbar-brand {
     box-shadow: 0 0.5rem 1.5rem rgba(43, 43, 43, 0.08);
 }
 
+/* Tarjetas del catálogo de servicios. */
+.card-servicio {
+    background-color: var(--salon-surface);
+    border: 0;
+    border-top: 4px solid var(--salon-accent);
+    box-shadow: 0 0.25rem 1rem rgba(43, 43, 43, 0.06);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card-servicio:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1.5rem rgba(43, 43, 43, 0.1);
+}
+
+/* Llamada a registrarse que ven los invitados en el catálogo. */
+.cta-registro {
+    background-color: var(--salon-surface);
+    border-left: 4px solid var(--salon-primary);
+    border-radius: var(--bs-border-radius);
+}
+
 .precio {
     color: var(--salon-primary-dark);
     font-weight: 600;
