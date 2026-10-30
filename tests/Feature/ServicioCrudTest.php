@@ -186,5 +186,8 @@ class ServicioCrudTest extends TestCase
         $pagina2 = $this->actingAs($admin)->get(route('admin.servicios.index', ['page' => 2]))->assertOk();
         $this->assertCount(2, $pagina2->viewData('servicios'));
         $pagina2->assertSee('Servicio 11')->assertSee('Servicio 12');
+
+        // Textos de la paginación en español (lang/es.json).
+        $pagina2->assertSee('Mostrando')->assertDontSee('Showing');
     }
 }
