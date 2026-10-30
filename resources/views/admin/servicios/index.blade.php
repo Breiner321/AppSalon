@@ -24,7 +24,43 @@
             <i class="bi bi-info-circle" aria-hidden="true"></i> Aún no hay servicios registrados.
         </div>
     @else
-        <div class="card card-tabla">
+        {{-- Móvil (< 768 px): tarjetas apiladas con las acciones a la vista. --}}
+        <ul class="list-unstyled d-md-none mb-0" aria-label="Servicios">
+            @foreach ($servicios as $servicio)
+                <li class="card tarjeta-servicio-movil mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                            <h2 class="h6 mb-0">{{ $servicio->nombre }}</h2>
+                            @if ($servicio->activo)
+                                <span class="badge text-bg-success">Activo</span>
+                            @else
+                                <span class="badge text-bg-secondary">Inactivo</span>
+                            @endif
+                        </div>
+                        <p class="mb-3 d-flex justify-content-between">
+                            <span class="text-body-secondary"><i class="bi bi-clock" aria-hidden="true"></i> {{ $servicio->duracion }} min</span>
+                            <span class="precio">${{ number_format((float) $servicio->precio, 2) }}</span>
+                        </p>
+                        <div class="d-flex gap-2">
+                            <a href="{{ route('admin.servicios.edit', $servicio) }}" class="btn btn-outline-primary flex-fill"
+                               aria-label="Editar {{ $servicio->nombre }}">
+                                <i class="bi bi-pencil" aria-hidden="true"></i> Editar
+                            </a>
+                            <button type="button" class="btn btn-outline-danger flex-fill"
+                                    aria-label="Eliminar {{ $servicio->nombre }}"
+                                    data-bs-toggle="modal" data-bs-target="#modalEliminar"
+                                    data-accion="{{ route('admin.servicios.destroy', $servicio) }}"
+                                    data-nombre="{{ $servicio->nombre }}">
+                                <i class="bi bi-trash" aria-hidden="true"></i> Eliminar
+                            </button>
+                        </div>
+                    </div>
+                </li>
+            @endforeach
+        </ul>
+
+        {{-- Tableta y escritorio (>= 768 px): tabla. --}}
+        <div class="card card-tabla d-none d-md-block">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead>
