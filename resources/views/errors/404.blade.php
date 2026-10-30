@@ -11,7 +11,7 @@
             Es posible que la dirección esté mal escrita o que la página ya no exista.
         </p>
         <a href="{{ route('servicios.catalogo') }}" class="btn btn-primary">
-            <i class="bi bi-scissors" aria-hidden="true"></i> Ver servicios
+            <i class="bi bi-scissors" aria-hidden="true"></i> Volver a los servicios
         </a>
     </div>
 @endsection

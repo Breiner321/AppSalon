@@ -12,7 +12,7 @@
             Vuelve a la página anterior, recárgala y envía el formulario otra vez.
         </p>
         <a href="{{ route('servicios.catalogo') }}" class="btn btn-primary">
-            <i class="bi bi-scissors" aria-hidden="true"></i> Ir a los servicios
+            <i class="bi bi-scissors" aria-hidden="true"></i> Volver a los servicios
         </a>
     </div>
 @endsection

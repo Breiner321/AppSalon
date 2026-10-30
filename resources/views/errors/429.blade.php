@@ -11,7 +11,7 @@
             Hiciste muchos intentos en poco tiempo. Espera un minuto y vuelve a intentarlo.
         </p>
         <a href="{{ route('servicios.catalogo') }}" class="btn btn-primary">
-            <i class="bi bi-scissors" aria-hidden="true"></i> Ir a los servicios
+            <i class="bi bi-scissors" aria-hidden="true"></i> Volver a los servicios
         </a>
     </div>
 @endsection
