@@ -7,7 +7,7 @@
 @section('content')
     <nav aria-label="Ruta de navegación" class="mb-3">
         <ol class="breadcrumb mb-0">
-            <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">Admin</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">Panel</a></li>
             <li class="breadcrumb-item active" aria-current="page">Servicios</li>
         </ol>
     </nav>
