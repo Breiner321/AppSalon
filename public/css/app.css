@@ -77,6 +77,31 @@ h1, h2, h3, .navbar-brand {
     max-width: 44rem;
 }
 
+/* Contenedor de las tablas del panel. */
+.card-tabla {
+    background-color: var(--salon-surface);
+    border: 0;
+    box-shadow: 0 0.25rem 1rem rgba(43, 43, 43, 0.06);
+    overflow: hidden;
+}
+
+.card-tabla thead th {
+    color: var(--salon-muted);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.pagination {
+    --bs-pagination-active-bg: var(--salon-primary);
+    --bs-pagination-active-border-color: var(--salon-primary);
+    --bs-pagination-color: var(--salon-primary);
+    --bs-pagination-hover-color: var(--salon-primary-dark);
+    --bs-pagination-focus-color: var(--salon-primary-dark);
+    --bs-pagination-focus-box-shadow: 0 0 0 0.25rem rgba(123, 45, 91, 0.2);
+}
+
 /* Tarjetas del catálogo de servicios. */
 .card-servicio {
     background-color: var(--salon-surface);

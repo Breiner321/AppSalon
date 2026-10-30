@@ -26,12 +26,13 @@ class ServiceController extends Controller
     }
 
     /**
-     * Listado de servicios en el panel de administración.
+     * Listado de servicios en el panel de administración, 10 por página.
      */
-    public function index()
+    public function index(): View
     {
-        // TODO U5: listado de servicios del panel
-        abort(501);
+        $servicios = Service::orderBy('nombre')->paginate(10);
+
+        return view('admin.servicios.index', compact('servicios'));
     }
 
     /**
@@ -66,29 +67,49 @@ class ServiceController extends Controller
     }
 
     /**
-     * Formulario para editar un servicio.
+     * Formulario para editar un servicio (route model binding: {servicio}).
      */
-    public function edit(string $id)
+    public function edit(Service $servicio): View
     {
-        // TODO U5: formulario de edición
-        abort(501);
+        return view('admin.servicios.form', compact('servicio'));
     }
 
     /**
      * Actualiza un servicio existente.
      */
-    public function update(string $id)
+    public function update(ServiceRequest $request, Service $servicio): RedirectResponse
     {
-        // TODO U6: validar y actualizar el servicio
-        abort(501);
+        $resultado = $this->runSafely(
+            fn () => $servicio->update($request->validated()),
+            'No pudimos actualizar el servicio. Intenta de nuevo.'
+        );
+
+        if ($resultado instanceof RedirectResponse) {
+            return $resultado;
+        }
+
+        return redirect()
+            ->route('admin.servicios.index')
+            ->with('success', 'Servicio actualizado');
     }
 
     /**
-     * Elimina un servicio.
+     * Elimina un servicio. Las filas de citasServicios que lo usan se borran
+     * en cascada (ver la migración de citasServicios).
      */
-    public function destroy(string $id)
+    public function destroy(Service $servicio): RedirectResponse
     {
-        // TODO U6: eliminar el servicio
-        abort(501);
+        $resultado = $this->runSafely(
+            fn () => $servicio->delete(),
+            'No pudimos eliminar el servicio. Intenta de nuevo.'
+        );
+
+        if ($resultado instanceof RedirectResponse) {
+            return $resultado;
+        }
+
+        return redirect()
+            ->route('admin.servicios.index')
+            ->with('success', 'Servicio eliminado');
     }
 }
