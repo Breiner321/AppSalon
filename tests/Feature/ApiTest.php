@@ -37,6 +37,7 @@ class ApiTest extends TestCase
             ->assertOk()
             ->assertJsonStructure(['message', 'data' => ['token', 'tipo', 'expiraEl', 'usuario' => ['id', 'nombre', 'apellido', 'email', 'telefono', 'admin']]])
             ->assertJsonPath('data.tipo', 'Bearer')
+            ->assertJsonPath('data.expiraEl', now()->addDay()->toIso8601String())
             ->assertJsonMissingPath('data.usuario.password');
 
         $token = $respuesta->json('data.token');
@@ -50,6 +51,9 @@ class ApiTest extends TestCase
     {
         $this->postJson('/api/login', ['email' => 'laura@correo.com', 'password' => 'mala'])
             ->assertUnauthorized()->assertExactJson(['message' => 'Credenciales incorrectas']);
+
+        // Los acentos van sin escapar.
+        $this->assertStringContainsString('Envía el token', $this->getJson('/api/usuario')->getContent());
 
         $this->postJson('/api/login', ['email' => 'no-es-correo'])
             ->assertUnprocessable()->assertJsonValidationErrors(['email', 'password']);

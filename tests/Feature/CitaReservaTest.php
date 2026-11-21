@@ -116,7 +116,7 @@ class CitaReservaTest extends TestCase
         $reservar(['fecha' => '2026-12-08', 'hora' => '08:00'])->assertSessionHasErrors('hora');
         $reservar(['fecha' => '2026-12-08', 'hora' => '17:30'])->assertSessionHasErrors('hora');
         // Domingo cerrado.
-        $reservar(['fecha' => '2026-12-13', 'hora' => '10:00'])->assertSessionHasErrors(['hora' => 'El salón no atiende los domingo.']);
+        $reservar(['fecha' => '2026-12-13', 'hora' => '10:00'])->assertSessionHasErrors(['hora' => 'El salón no atiende los domingos.']);
         // Fecha pasada y fecha demasiado lejana.
         $reservar(['fecha' => '2026-12-06', 'hora' => '10:00'])->assertSessionHasErrors('fecha');
         $reservar(['fecha' => '2027-06-01', 'hora' => '10:00'])->assertSessionHasErrors('fecha');

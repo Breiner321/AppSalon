@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\EnsureUserIsActive;
+use App\Http\Middleware\JsonSinEscaparUnicode;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
@@ -28,6 +29,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'activo' => EnsureUserIsActive::class,
         ]);
 
+        // JSON de la API con acentos legibles.
+        $middleware->api(append: [JsonSinEscaparUnicode::class]);
+
         // Invitado en una ruta con 'auth': al formulario de login (en la API, 401 en JSON).
         $middleware->redirectGuestsTo(fn (Request $request) => $request->is('api/*') ? null : route('login'));
 
@@ -51,7 +55,7 @@ return Application::configure(basePath: dirname(__DIR__))
         foreach ($mensajes as $clase => [$codigo, $mensaje]) {
             $exceptions->render(function (Throwable $e, Request $request) use ($clase, $codigo, $mensaje) {
                 if ($e instanceof $clase && $request->is('api/*')) {
-                    return response()->json(['message' => $mensaje], $codigo, $e instanceof TooManyRequestsHttpException ? $e->getHeaders() : []);
+                    return response()->json(['message' => $mensaje], $codigo, $e instanceof TooManyRequestsHttpException ? $e->getHeaders() : [], JSON_UNESCAPED_UNICODE);
                 }
             });
         }

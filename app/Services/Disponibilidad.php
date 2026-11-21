@@ -111,7 +111,10 @@ class Disponibilidad
         $horario = $this->horarioDe($fecha);
 
         if (! $horario) {
-            return 'El salón no atiende los '.mb_strtolower(Horario::DIAS[$fecha->dayOfWeek]).'.';
+            // sábado → sábados, domingo → domingos; lunes a viernes no cambian.
+            $dia = mb_strtolower(Horario::DIAS[$fecha->dayOfWeek]);
+
+            return 'El salón no atiende los '.(str_ends_with($dia, 's') ? $dia : $dia.'s').'.';
         }
 
         $inicio = Horario::aMinutos($hora);

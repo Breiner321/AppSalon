@@ -55,6 +55,7 @@ class AppointmentRequest extends FormRequest
 
         return [
             'fecha' => [
+                'bail',
                 'required',
                 'date_format:Y-m-d',
                 'after_or_equal:today',

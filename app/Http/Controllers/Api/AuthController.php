@@ -40,7 +40,8 @@ class AuthController extends Controller
         }
 
         $nombreDispositivo = substr((string) $request->input('dispositivo', 'api'), 0, 60);
-        $token = $usuario->createToken($nombreDispositivo);
+        $minutos = (int) config('sanctum.expiration');
+        $token = $usuario->createToken($nombreDispositivo, ['*'], $minutos > 0 ? now()->addMinutes($minutos) : null);
 
         return response()->json([
             'message' => "Bienvenido, {$usuario->nombre}",
