@@ -214,3 +214,189 @@ h1, h2, h3, .navbar-brand {
     border: 2px dashed rgba(123, 45, 91, 0.2);
     border-radius: var(--bs-border-radius-lg);
 }
+
+/* ===== Entrega Final: citas, agenda y panel ===== */
+
+/* Tarjetas planas para los pasos de la reserva. */
+.card-form-plano,
+.resumen-cita,
+.tarjeta-cita {
+    background-color: var(--salon-surface);
+    border: 0;
+    box-shadow: 0 0.25rem 1rem rgba(43, 43, 43, 0.06);
+}
+
+.resumen-cita {
+    border-top: 4px solid var(--salon-primary);
+}
+
+.tarjeta-cita {
+    border-left: 4px solid var(--salon-accent);
+}
+
+/* Número de paso en un círculo. */
+.paso {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    margin-right: 0.25rem;
+    border-radius: 50%;
+    background-color: var(--salon-primary);
+    color: #fff;
+    font-size: 0.9rem;
+}
+
+/* Lista de servicios elegibles. */
+.lista-servicios {
+    max-height: 32rem;
+    overflow-y: auto;
+}
+
+.opcion-servicio {
+    border: 1px solid rgba(123, 45, 91, 0.15);
+    border-radius: var(--bs-border-radius);
+    cursor: pointer;
+    min-height: 2.75rem;
+}
+
+.opcion-servicio:has(input:checked) {
+    border-color: var(--salon-primary);
+    background-color: rgba(232, 160, 191, 0.15);
+}
+
+/* Calendario mensual: 7 columnas, de lunes a domingo. */
+.calendario-semana,
+.calendario-dias {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.25rem;
+    text-align: center;
+}
+
+.calendario-semana span {
+    color: var(--salon-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.25rem 0;
+}
+
+.calendario .dia {
+    min-height: 2.75rem;
+    border: 1px solid rgba(123, 45, 91, 0.25);
+    border-radius: var(--bs-border-radius);
+    background-color: var(--salon-surface);
+    color: var(--salon-text);
+    font-weight: 600;
+}
+
+.calendario .dia:hover:not(:disabled) {
+    background-color: rgba(232, 160, 191, 0.25);
+}
+
+.calendario .dia:focus-visible {
+    outline: 3px solid var(--salon-accent);
+    outline-offset: 1px;
+}
+
+.calendario .dia.hoy {
+    text-decoration: underline;
+}
+
+.calendario .dia[aria-pressed="true"] {
+    background-color: var(--salon-primary);
+    border-color: var(--salon-primary);
+    color: #fff;
+}
+
+.calendario .dia:disabled {
+    background-color: #F1EDEF;
+    border-color: transparent;
+    color: #A8A2A5;
+    font-weight: 400;
+    cursor: not-allowed;
+}
+
+.leyenda {
+    display: inline-block;
+    width: 0.9rem;
+    height: 0.9rem;
+    border-radius: 0.2rem;
+    vertical-align: -0.1rem;
+}
+
+.leyenda-libre {
+    border: 1px solid rgba(123, 45, 91, 0.4);
+    background-color: var(--salon-surface);
+}
+
+.leyenda-cerrado {
+    background-color: #F1EDEF;
+}
+
+/* Botones de horas libres. */
+.turnos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr));
+    gap: 0.5rem;
+}
+
+.turno[aria-pressed="true"] {
+    background-color: var(--salon-primary);
+    border-color: var(--salon-primary);
+    color: #fff;
+}
+
+/* Agenda del panel: un bloque por día y una fila por cita. */
+.agenda-dia {
+    background-color: var(--salon-surface);
+    border: 0;
+    box-shadow: 0 0.25rem 1rem rgba(43, 43, 43, 0.06);
+}
+
+.agenda-dia.es-hoy {
+    border-top: 4px solid var(--salon-primary);
+}
+
+.agenda-cita {
+    border-left: 4px solid var(--salon-accent);
+    padding-left: 0.75rem;
+}
+
+.agenda-cita.estado-cancelada {
+    opacity: 0.6;
+    border-left-color: #ADB5BD;
+}
+
+.agenda-cita.estado-confirmada {
+    border-left-color: var(--salon-primary);
+}
+
+.agenda-cita.estado-completada {
+    border-left-color: var(--bs-success);
+}
+
+.agenda-hora {
+    font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-weight: 600;
+    min-width: 6.5rem;
+}
+
+/* Barra de filtros de los listados del panel. */
+.filtros {
+    background-color: var(--salon-surface);
+    border-radius: var(--bs-border-radius-lg);
+    box-shadow: 0 0.25rem 1rem rgba(43, 43, 43, 0.06);
+}
+
+.form-select:focus {
+    border-color: var(--salon-accent);
+    box-shadow: 0 0 0 0.25rem rgba(123, 45, 91, 0.2);
+}
+
+/* Botón contorno deshabilitado (flechas del calendario en el primer y último mes). */
+.btn-outline-primary {
+    --bs-btn-disabled-color: var(--salon-primary);
+    --bs-btn-disabled-border-color: rgba(123, 45, 91, 0.3);
+}

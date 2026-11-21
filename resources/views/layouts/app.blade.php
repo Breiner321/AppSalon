@@ -18,7 +18,7 @@
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 </head>
 <body class="d-flex flex-column min-vh-100">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-xl navbar-dark bg-primary">
         <div class="container">
             <a class="navbar-brand" href="{{ route('servicios.catalogo') }}">
                 <i class="bi bi-scissors" aria-hidden="true"></i> {{ config('app.name', 'AppSalon') }}
@@ -28,9 +28,9 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
 
-            {{-- Menú según el rol: invitado, cliente o administrador. Colapsa en pantallas < lg. --}}
+            {{-- Menú según el rol: invitado, cliente o administrador. Colapsa en pantallas < xl. --}}
             <div class="collapse navbar-collapse" id="menuPrincipal">
-                <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
+                <ul class="navbar-nav ms-auto align-items-xl-center gap-xl-1">
                     <li class="nav-item">
                         <a class="nav-link @if (request()->routeIs('servicios.catalogo', 'inicio')) active @endif"
                            href="{{ route('servicios.catalogo') }}"
@@ -63,10 +63,46 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link @if (request()->routeIs('admin.servicios.*')) active @endif"
-                                   href="{{ route('admin.servicios.index') }}"
+                                <a class="nav-link @if (request()->routeIs('admin.agenda')) active @endif" href="{{ route('admin.agenda') }}"
+                                   @if (request()->routeIs('admin.agenda')) aria-current="page" @endif>
+                                    <i class="bi bi-calendar-week" aria-hidden="true"></i> Agenda
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @if (request()->routeIs('admin.citas.*')) active @endif" href="{{ route('admin.citas.index') }}"
+                                   @if (request()->routeIs('admin.citas.*')) aria-current="page" @endif>
+                                    <i class="bi bi-calendar-check" aria-hidden="true"></i> Citas
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @if (request()->routeIs('admin.usuarios.*')) active @endif" href="{{ route('admin.usuarios.index') }}"
+                                   @if (request()->routeIs('admin.usuarios.*')) aria-current="page" @endif>
+                                    <i class="bi bi-people" aria-hidden="true"></i> Usuarios
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @if (request()->routeIs('admin.servicios.*')) active @endif" href="{{ route('admin.servicios.index') }}"
                                    @if (request()->routeIs('admin.servicios.*')) aria-current="page" @endif>
                                     <i class="bi bi-list-check" aria-hidden="true"></i> Gestionar servicios
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @if (request()->routeIs('admin.horarios.*')) active @endif" href="{{ route('admin.horarios.index') }}"
+                                   @if (request()->routeIs('admin.horarios.*')) aria-current="page" @endif>
+                                    <i class="bi bi-clock" aria-hidden="true"></i> Horarios
+                                </a>
+                            </li>
+                        @else
+                            <li class="nav-item">
+                                <a class="nav-link @if (request()->routeIs('citas.create')) active @endif" href="{{ route('citas.create') }}"
+                                   @if (request()->routeIs('citas.create')) aria-current="page" @endif>
+                                    <i class="bi bi-calendar-plus" aria-hidden="true"></i> Reservar cita
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link @if (request()->routeIs('citas.index')) active @endif" href="{{ route('citas.index') }}"
+                                   @if (request()->routeIs('citas.index')) aria-current="page" @endif>
+                                    <i class="bi bi-calendar-heart" aria-hidden="true"></i> Mis citas
                                 </a>
                             </li>
                         @endif

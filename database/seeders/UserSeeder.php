@@ -6,12 +6,15 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 
 /**
- * Cuentas fijas para probar la aplicación: un administrador y un cliente.
+ * Cuentas para probar la aplicación: un administrador, la cliente de prueba
+ * y ocho clientes más con datos realistas (uno sin confirmar y uno desactivado),
+ * para que la agenda, la búsqueda y los filtros tengan datos.
  */
 class UserSeeder extends Seeder
 {
     /**
-     * Crea o actualiza las dos cuentas por su email, ya confirmadas.
+     * Crea o actualiza las cuentas por su email. Todas usan la contraseña
+     * Cliente123 salvo el administrador (Admin123).
      *
      * admin y confirmado están fuera de $fillable (para que un formulario no
      * pueda cambiarlos), por eso la asignación se hace dentro de unguarded().
@@ -38,11 +41,35 @@ class UserSeeder extends Seeder
             ],
         ];
 
+        $clientes = [
+            ['Camila', 'Rodríguez', 'camila.rodriguez@correo.com', '3104567890'],
+            ['Andrés', 'Martínez', 'andres.martinez@correo.com', '3125551234'],
+            ['Valentina', 'López', 'valentina.lopez@correo.com', '3156789012'],
+            ['Santiago', 'Hernández', 'santi.hernandez@correo.com', '3001112233'],
+            ['Daniela', 'Torres', 'daniela.torres@correo.com', '3017894561'],
+            ['Mariana', 'Ramírez', 'mariana.ramirez@correo.com', '3204445566'],
+            ['Julián', 'Castro', 'julian.castro@correo.com', '3189990011', 'confirmado' => false],
+            ['Paula', 'Moreno', 'paula.moreno@correo.com', '3162223344', 'activo' => false],
+        ];
+
+        foreach ($clientes as $c) {
+            $usuarios[] = [
+                'nombre' => $c[0],
+                'apellido' => $c[1],
+                'email' => $c[2],
+                'password' => 'Cliente123',
+                'telefono' => $c[3],
+                'admin' => false,
+                'confirmado' => $c['confirmado'] ?? true,
+                'activo' => $c['activo'] ?? true,
+            ];
+        }
+
         User::unguarded(function () use ($usuarios) {
             foreach ($usuarios as $datos) {
                 User::updateOrCreate(
                     ['email' => $datos['email']],
-                    $datos + ['confirmado' => true],
+                    $datos + ['confirmado' => true, 'activo' => true],
                 );
             }
         });
