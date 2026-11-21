@@ -90,6 +90,9 @@
         .faq dt { font-weight: 600; color: var(--primario-oscuro); margin-top: 0.22cm; }
         .faq dd { margin: 0.05cm 0 0 0; }
 
+        .rejilla { display: grid; grid-template-columns: 1fr 1fr; gap: 0.3cm 0.4cm; margin-top: 0.15cm; }
+        .pasos li { margin-bottom: 0.1cm; }
+
         .pie { margin-top: 0.4cm; font-size: 8pt; color: var(--suave); }
     </style>
 </head>
@@ -116,170 +119,166 @@
     <ol>
         <li>Abre el navegador y escribe la dirección del salón. En el equipo de la demo es <code>http://127.0.0.1:8000</code>.</li>
         <li>Verás el <strong>catálogo de servicios</strong>. Se puede consultar sin cuenta.</li>
-        <li>Usa el menú superior: <strong>Servicios</strong>, <strong>Iniciar sesión</strong> o <strong>Registrarse</strong>.
-            En el celular, el menú se abre con el botón <strong>☰</strong>.</li>
+        <li>Usa el menú superior. En el celular, el menú se abre con el botón <strong>☰</strong>.</li>
     </ol>
 
     <h3>Tipos de usuario</h3>
     <table>
         <tr><th>Rol</th><th>Qué puede hacer</th><th>Cuenta de prueba</th></tr>
         <tr><td>Visitante</td><td>Ver el catálogo y crear una cuenta.</td><td>No necesita</td></tr>
-        <tr><td>Cliente</td><td>Iniciar sesión y ver el catálogo. La reserva de citas llega en la siguiente versión.</td><td><code>cliente@appsalon.com</code> / <code>Cliente123</code></td></tr>
-        <tr><td>Administrador</td><td>Todo lo anterior, el panel y la gestión de servicios.</td><td><code>admin@appsalon.com</code> / <code>Admin123</code></td></tr>
+        <tr><td>Cliente</td><td>Reservar citas en el calendario, ver sus citas, modificarlas y cancelarlas.</td><td><code>cliente@appsalon.com</code> / <code>Cliente123</code></td></tr>
+        <tr><td>Administrador</td><td>Dashboard, agenda, citas, usuarios, servicios y horarios del salón.</td><td><code>admin@appsalon.com</code> / <code>Admin123</code></td></tr>
     </table>
-    <p class="pie">AppSalon · Entrega intermedia (semana 11) · Laravel 12, MySQL y Bootstrap 5.</p>
+    <p class="pie">AppSalon · Entrega final (semana 16) · Laravel 12, MySQL y Bootstrap 5.</p>
 </section>
 
-<!-- 2. Cliente -->
+<!-- 2. Cuenta del cliente -->
 <section>
-    <h2><span class="seccion-num">2</span>Cliente: registro, cuenta, inicio de sesión y catálogo</h2>
+    <h2><span class="seccion-num">2</span>Cliente: crear la cuenta e iniciar sesión</h2>
 
-    <h3>Crear una cuenta</h3>
-    <ol>
-        <li>En el menú, pulsa <strong>Registrarse</strong>.</li>
-        <li>Completa los campos con <span style="color:#dc3545">*</span>: nombre, apellido, correo, contraseña (mínimo 6 caracteres) y su confirmación.
-            El teléfono es opcional y lleva 10 dígitos sin espacios.</li>
-        <li>Pulsa <strong>Crear cuenta</strong>. Si algo está mal, el campo se marca en rojo con el motivo; lo que escribiste se conserva, salvo las contraseñas.</li>
-    </ol>
-    <div class="fila">
-        <figure><img src="../capturas/02-registro.png" alt="Formulario de registro"><figcaption>Formulario de registro.</figcaption></figure>
-        <figure><img src="../capturas/03-registro-errores.png" alt="Registro con errores"><figcaption>Errores marcados en cada campo.</figcaption></figure>
-    </div>
-
-    <h3>Confirmación de la cuenta</h3>
-    <p>Al terminar el registro verás el mensaje verde <em>«Revisa tu correo para confirmar la cuenta»</em>.
-        Abre el correo de AppSalon y pulsa <strong>Confirmar mi cuenta</strong>: verás <em>«Cuenta confirmada»</em> y ya podrás iniciar sesión.
-        <strong>Hasta confirmarla no puedes entrar</strong>, aunque la contraseña sea correcta. Cada enlace sirve una sola vez.</p>
-
-    <h3>Iniciar y cerrar sesión</h3>
     <div class="fila">
         <div>
+            <h3>Crear una cuenta</h3>
+            <ol>
+                <li>En el menú, pulsa <strong>Registrarse</strong>.</li>
+                <li>Completa los campos con <span style="color:#dc3545">*</span>: nombre, apellido, correo, contraseña (mínimo 6 caracteres) y su confirmación.
+                    El teléfono es opcional y lleva 10 dígitos sin espacios.</li>
+                <li>Pulsa <strong>Crear cuenta</strong>. Si algo está mal, el campo se marca en rojo con el motivo; lo que escribiste se conserva, salvo las contraseñas.</li>
+            </ol>
+            <h3>Confirmar la cuenta</h3>
+            <p>Verás <em>«Revisa tu correo para confirmar la cuenta»</em>. Abre el correo de AppSalon y pulsa
+                <strong>Confirmar mi cuenta</strong>. <strong>Hasta confirmarla no puedes entrar</strong>. Cada enlace sirve una sola vez.</p>
+        </div>
+        <figure><img src="../capturas/03-registro-errores.png" alt="Registro con errores"><figcaption>Registro: los errores se marcan en cada campo.</figcaption></figure>
+    </div>
+
+    <div class="fila">
+        <figure><img src="../capturas/04-login.png" alt="Inicio de sesión"><figcaption>Pantalla de inicio de sesión.</figcaption></figure>
+        <div>
+            <h3>Iniciar y cerrar sesión</h3>
             <ol>
                 <li>Pulsa <strong>Iniciar sesión</strong>, escribe tu correo y tu contraseña, y confirma.</li>
-                <li>Verás <em>«Bienvenido, &lt;tu nombre&gt;»</em> y el catálogo. Tu nombre aparece arriba a la derecha.</li>
+                <li>Verás <em>«Bienvenido, &lt;tu nombre&gt;»</em> y el catálogo. En el menú aparecen
+                    <strong>Reservar cita</strong> y <strong>Mis citas</strong>.</li>
                 <li>Para salir, abre el menú con tu nombre y pulsa <strong>Cerrar sesión</strong>. Hazlo siempre en equipos compartidos.</li>
             </ol>
             <h3>Consultar el catálogo</h3>
-            <p>Cada tarjeta muestra el servicio, una descripción, la duración en minutos (<strong>⏱</strong>) y el precio.
-                Solo aparecen los servicios activos. En el celular las tarjetas se ven una debajo de otra.</p>
+            <p>Cada tarjeta muestra el servicio, su descripción, la duración en minutos y el precio. Con la sesión iniciada,
+                el botón <strong>Reservar</strong> de una tarjeta abre la reserva con ese servicio ya elegido.</p>
         </div>
-        <figure><img src="../capturas/04-login.png" alt="Inicio de sesión"><figcaption>Pantalla de inicio de sesión.</figcaption></figure>
     </div>
 </section>
 
-<!-- 3. Administrador -->
+<!-- 3. Citas del cliente -->
 <section>
-    <h2><span class="seccion-num">3</span>Administrador: panel y gestión de servicios</h2>
-    <p>Al iniciar sesión con una cuenta de administrador llegas al <strong>Panel</strong>. En el menú aparecen además
-        <strong>Panel</strong> y <strong>Gestionar servicios</strong>. La ruta de navegación (Panel / Servicios / …) te dice dónde estás.</p>
-
-    <div class="fila">
-        <figure><img src="../capturas/05-panel-admin.png" alt="Panel de administración"><figcaption>Panel: servicios activos, inactivos y usuarios registrados.</figcaption></figure>
-        <figure><img src="../capturas/06-listado-servicios.png" alt="Listado de servicios"><figcaption>Listado: 10 servicios por página, con estado y acciones.</figcaption></figure>
-    </div>
+    <h2><span class="seccion-num">3</span>Cliente: reservar y gestionar citas</h2>
 
     <div class="fila">
         <div>
-            <h3>Crear un servicio</h3>
-            <ol>
-                <li>Pulsa <strong>Nuevo servicio</strong> (en el panel o en el listado).</li>
-                <li>Escribe el nombre (máx. 60 caracteres), el precio (de 0 a 999.99) y la duración (de 10 a 480 minutos). La descripción es opcional.</li>
-                <li>Deja <strong>Activo</strong> encendido para que se vea en el catálogo y pulsa <strong>Guardar</strong>.</li>
+            <h3>Reservar una cita</h3>
+            <ol class="pasos">
+                <li>Pulsa <strong>Reservar cita</strong> en el menú.</li>
+                <li><strong>Servicios:</strong> marca uno o varios. El resumen suma la duración y el total.</li>
+                <li><strong>Día:</strong> elige una fecha en el calendario. Los días en gris no se pueden reservar
+                    (ya pasaron, el salón no abre o es una fecha bloqueada). Cambia de mes con las flechas.</li>
+                <li><strong>Hora:</strong> aparecen solo las horas libres en que caben todos tus servicios antes del cierre.
+                    Si cambias los servicios, la lista se actualiza.</li>
+                <li>Revisa el resumen y pulsa <strong>Reservar cita</strong>. Te llega un correo con el detalle.</li>
             </ol>
-            <h3>Editar un servicio</h3>
-            <ol>
-                <li>En el listado pulsa el lápiz <strong>✎</strong> del servicio.</li>
-                <li>Cambia los datos y pulsa <strong>Guardar</strong>. Para ocultarlo sin borrarlo, apaga <strong>Activo</strong>.</li>
-            </ol>
+            <div class="nota">La cita queda <strong>pendiente</strong> hasta que el salón la confirme; también te avisamos por correo.
+                Se reserva con al menos 1 hora de anticipación y hasta 60 días adelante.</div>
         </div>
-        <figure><img src="../capturas/07-crear-servicio.png" alt="Formulario de nuevo servicio"><figcaption>Formulario de nuevo servicio.</figcaption></figure>
+        <figure><img src="../capturas/12-reservar-cita.png" alt="Reservar cita"><figcaption>Servicios, calendario, horas libres y resumen.</figcaption></figure>
     </div>
 
     <div class="fila">
-        <figure><img src="../capturas/08-editar-servicio.png" alt="Editar servicio"><figcaption>Edición con los datos actuales.</figcaption></figure>
+        <figure><img src="../capturas/13-mis-citas.png" alt="Mis citas"><figcaption>Mis citas: próximas citas con su estado y acciones.</figcaption></figure>
         <div>
-            <h3>Eliminar un servicio</h3>
-            <ol>
-                <li>Pulsa la papelera <strong>🗑</strong> del servicio.</li>
-                <li>Lee la confirmación y pulsa <strong>Eliminar</strong>, o <strong>Cancelar</strong> para no hacer nada.</li>
-            </ol>
-            <div class="nota">Eliminar no se puede deshacer y también quita el servicio de las citas que lo incluyan.
-                Si solo quieres que deje de verse, desactívalo.</div>
-        </div>
-        <figure><img src="../capturas/09-confirmar-eliminar.png" alt="Confirmar eliminación"><figcaption>Ventana de confirmación.</figcaption></figure>
-    </div>
-</section>
-
-<!-- 4. Mensajes y errores comunes -->
-<section>
-    <h2><span class="seccion-num">4</span>Mensajes y errores comunes</h2>
-    <p>Los avisos aparecen arriba de la página y se cierran solos a los 5 segundos (o con la <strong>×</strong>):
-        <strong style="color:#198754">verde</strong> cuando algo salió bien, <strong style="color:#dc3545">rojo</strong> cuando falló
-        y <strong style="color:#0d6efd">azul</strong> para información.</p>
-
-    <table>
-        <tr><th style="width:38%">Mensaje</th><th>Qué significa y qué hacer</th></tr>
-        <tr><td>Campo en rojo con un texto debajo</td><td>Ese dato no es válido. Corrígelo según el texto y vuelve a enviar.</td></tr>
-        <tr><td>«Credenciales incorrectas»</td><td>El correo o la contraseña no coinciden. Revisa mayúsculas y que el correo sea el del registro.</td></tr>
-        <tr><td>«Ya existe una cuenta con ese correo electrónico.»</td><td>Ese correo ya está registrado: inicia sesión en lugar de registrarte.</td></tr>
-        <tr><td>«Confirma tu cuenta desde el enlace enviado a tu correo»</td><td>Aún no confirmaste la cuenta. Busca el correo de AppSalon (revisa también el correo no deseado) y abre el enlace.</td></tr>
-        <tr><td>«Token no válido»</td><td>El enlace de confirmación está incompleto o ya se usó. Si tu cuenta ya está confirmada, solo inicia sesión.</td></tr>
-        <tr><td>«Demasiados intentos»</td><td>Hubo más de 5 intentos de inicio de sesión o registro en un minuto. Espera un minuto.</td></tr>
-        <tr><td>«No tienes permiso para ver esta página» (403)</td><td>Entraste a una sección solo para administradores con una cuenta de cliente.</td></tr>
-        <tr><td>«No encontramos esta página» (404)</td><td>La dirección está mal escrita o el servicio ya fue eliminado.</td></tr>
-        <tr><td>«La página expiró» (419)</td><td>El formulario estuvo abierto mucho tiempo. Recarga la página y envíalo otra vez.</td></tr>
-        <tr><td>«No pudimos completar la solicitud»</td><td>Abriste una dirección que no se usa así (por ejemplo, escribir <code>/logout</code> en el navegador). Usa los botones del sitio.</td></tr>
-        <tr><td>«Algo salió mal de nuestro lado» (500)</td><td>Falla del servidor. Intenta de nuevo en unos minutos; si sigue, avisa al administrador.</td></tr>
-        <tr><td>«No pudimos guardar/actualizar/eliminar el servicio»</td><td>La base de datos no respondió. Tus datos quedan en el formulario: inténtalo de nuevo.</td></tr>
-    </table>
-
-    <div class="fila">
-        <figure><img src="../capturas/10-acceso-denegado.png" alt="Acceso denegado"><figcaption>Página de acceso denegado (403) vista por un cliente.</figcaption></figure>
-        <div>
-            <h3>Antes de pedir ayuda</h3>
+            <h3>Mis citas: modificar o cancelar</h3>
             <ul>
-                <li>Recarga la página (<kbd>F5</kbd>).</li>
-                <li>Revisa que la sesión siga abierta: tu nombre debe verse arriba a la derecha.</li>
-                <li>Cierra sesión y vuelve a entrar.</li>
-                <li>Prueba en otro navegador o en una ventana privada.</li>
+                <li>En <strong>Mis citas</strong> ves tus próximas citas (fecha, hora, servicios, total y estado) y abajo el historial.</li>
+                <li><strong>Modificar:</strong> cambia servicios, día u hora con el mismo calendario y pulsa <strong>Guardar cambios</strong>. La cita vuelve a quedar pendiente.</li>
+                <li><strong>Cancelar:</strong> pulsa <strong>Cancelar</strong> y confirma. El horario queda libre.</li>
+                <li>Solo se pueden cambiar citas <em>pendientes</em> o <em>confirmadas</em> que todavía no empiezan.</li>
             </ul>
         </div>
     </div>
+
+    <table>
+        <tr><th>Estado</th><th>Significado</th></tr>
+        <tr><td><strong style="color:#997404">Pendiente</strong></td><td>Reservada; el salón aún no la confirma.</td></tr>
+        <tr><td><strong style="color:#7B2D5B">Confirmada</strong></td><td>El salón te espera a esa hora.</td></tr>
+        <tr><td><strong style="color:#198754">Completada</strong></td><td>Ya fuiste atendido.</td></tr>
+        <tr><td><strong style="color:#6c757d">Cancelada</strong></td><td>La cancelaste tú o el salón; no ocupa la agenda.</td></tr>
+    </table>
 </section>
 
-<!-- 5. Preguntas frecuentes -->
+<!-- 4. Administrador -->
 <section>
-    <h2><span class="seccion-num">5</span>Preguntas frecuentes</h2>
+    <h2><span class="seccion-num">4</span>Administrador: panel, agenda, usuarios, servicios y horarios</h2>
+    <p>Con una cuenta de administrador llegas al <strong>Panel</strong>. El menú tiene Panel, Agenda, Citas, Usuarios,
+        Gestionar servicios y Horarios.</p>
+
+    <div class="rejilla">
+        <figure><img src="../capturas/05-panel-admin.png" alt="Dashboard"><figcaption>Panel: citas de hoy, ingresos, clientes y pendientes.</figcaption></figure>
+        <figure><img src="../capturas/14-agenda-semana.png" alt="Agenda semanal"><figcaption>Agenda de la semana.</figcaption></figure>
+        <figure><img src="../capturas/16-usuarios.png" alt="Usuarios"><figcaption>Usuarios: búsqueda, filtros, activar y rol.</figcaption></figure>
+        <figure><img src="../capturas/17-horarios.png" alt="Horarios"><figcaption>Horario semanal y fechas bloqueadas.</figcaption></figure>
+    </div>
+
+    <table style="margin-top:0.3cm">
+        <tr><th style="width:21%">Sección</th><th>Cómo se usa</th></tr>
+        <tr><td><strong>Panel</strong></td><td>Citas de hoy, ingresos de hoy y del mes (citas completadas), clientes y aviso de citas por confirmar (botón <strong>Revisarlas</strong>).</td></tr>
+        <tr><td><strong>Agenda</strong></td><td>Botones <strong>Día</strong> / <strong>Semana</strong>, flechas y <strong>Hoy</strong> para moverte, o elige una fecha.
+            Para cambiar el estado de una cita, elígelo en la lista y pulsa <strong>⟳</strong>. Al confirmar o cancelar, el cliente recibe un correo.
+            Las citas completadas y canceladas ya no cambian.</td></tr>
+        <tr><td><strong>Citas</strong></td><td>Busca por nombre o correo del cliente y filtra por estado y fechas (<strong>Desde</strong>/<strong>Hasta</strong>). Pulsa <strong>Filtrar</strong>; <strong>✕</strong> quita los filtros.</td></tr>
+        <tr><td><strong>Usuarios</strong></td><td>Busca por nombre, correo o teléfono y filtra por rol o estado. <strong>Desactivar</strong> impide que la persona inicie sesión
+            (se puede volver a <strong>Activar</strong>). <strong>Hacer admin</strong> / <strong>Hacer cliente</strong> cambia el rol. No puedes cambiar tu propia cuenta.</td></tr>
+        <tr><td><strong>Gestionar servicios</strong></td><td><strong>Nuevo servicio</strong>: nombre (máx. 60), precio (0 a 999.99) y duración (10 a 480 min). El lápiz <strong>✎</strong> edita;
+            apaga <strong>Activo</strong> para ocultarlo del catálogo sin borrarlo. La papelera <strong>🗑</strong> lo elimina tras confirmar.</td></tr>
+        <tr><td><strong>Horarios</strong></td><td>Enciende o apaga cada día y ajusta apertura y cierre; pulsa <strong>Guardar horario</strong>.
+            En <strong>Bloquear una fecha</strong> elige el día y un motivo (ej.: festivo). Los cambios no cancelan citas ya reservadas: revísalas en la agenda.</td></tr>
+    </table>
+</section>
+
+<!-- 5. Mensajes y preguntas frecuentes -->
+<section>
+    <h2><span class="seccion-num">5</span>Mensajes y preguntas frecuentes</h2>
+    <p>Los avisos aparecen arriba y se cierran solos a los 5 segundos: <strong style="color:#198754">verde</strong> si salió bien,
+        <strong style="color:#dc3545">rojo</strong> si falló, <strong style="color:#997404">amarillo</strong> para advertencias y <strong style="color:#0d6efd">azul</strong> para información.</p>
+
+    <table>
+        <tr><th style="width:40%">Mensaje</th><th>Qué significa y qué hacer</th></tr>
+        <tr><td>Campo en rojo con un texto debajo</td><td>Ese dato no es válido. Corrígelo según el texto y vuelve a enviar.</td></tr>
+        <tr><td>«Credenciales incorrectas»</td><td>El correo o la contraseña no coinciden. Revisa mayúsculas y el correo del registro.</td></tr>
+        <tr><td>«Confirma tu cuenta desde el enlace enviado a tu correo»</td><td>Busca el correo de AppSalon (también en no deseado) y abre el enlace.</td></tr>
+        <tr><td>«Tu cuenta está desactivada»</td><td>Un administrador desactivó la cuenta. Comunícate con el salón.</td></tr>
+        <tr><td>«Ese horario ya está ocupado»</td><td>Otra persona reservó esa hora mientras elegías. Elige otra hora libre.</td></tr>
+        <tr><td>«No quedan horas libres ese día…»</td><td>Tus servicios no caben ese día. Prueba otro día o menos servicios.</td></tr>
+        <tr><td>«Esta cita ya no se puede modificar»</td><td>La cita ya pasó, está completada o cancelada.</td></tr>
+        <tr><td>«Demasiados intentos» (429)</td><td>Más de 5 intentos de inicio de sesión o registro en un minuto. Espera un minuto.</td></tr>
+        <tr><td>«No tienes permiso para ver esta página» (403)</td><td>Entraste a una sección de administración o a una cita que no es tuya.</td></tr>
+        <tr><td>«La página expiró» (419)</td><td>El formulario estuvo abierto mucho tiempo. Recarga la página y envíalo otra vez.</td></tr>
+        <tr><td>«Algo salió mal de nuestro lado» (500) o «No pudimos…»</td><td>Falla del servidor o de la base de datos. Intenta en unos minutos; si sigue, avisa al administrador.</td></tr>
+    </table>
+
     <dl class="faq">
-        <dt>¿Necesito una cuenta para ver los servicios y precios?</dt>
-        <dd>No. El catálogo es público. La cuenta servirá para reservar citas.</dd>
-
-        <dt>¿Ya puedo reservar una cita?</dt>
-        <dd>Todavía no. La reserva con fecha, hora y varios servicios llega en la entrega final.</dd>
-
+        <dt>¿Puedo reservar varios servicios en una sola cita?</dt>
+        <dd>Sí. Marca todos los que quieras: la cita dura la suma de sus duraciones y el total es la suma de sus precios.</dd>
+        <dt>¿Por qué no aparece una hora que veo libre en la agenda?</dt>
+        <dd>Solo se muestran horas en que caben <em>todos</em> tus servicios sin cruzarse con otra cita y antes del cierre.</dd>
+        <dt>¿Cómo sé que el salón confirmó mi cita?</dt>
+        <dd>Te llega un correo y en <strong>Mis citas</strong> el estado cambia a <em>Confirmada</em>.</dd>
         <dt>Olvidé mi contraseña, ¿cómo la recupero?</dt>
-        <dd>En esta versión aún no hay recuperación por correo. Pide al administrador del salón que te ayude.</dd>
-
-        <dt>¿Por qué el teléfono me marca error?</dt>
-        <dd>Debe tener exactamente 10 dígitos, sin espacios, guiones ni indicativo (por ejemplo, <code>3001234567</code>). También puedes dejarlo vacío.</dd>
-
+        <dd>Aún no hay recuperación por correo. Pide ayuda al administrador del salón.</dd>
         <dt>¿Cómo convierto a un cliente en administrador?</dt>
-        <dd>Por seguridad no se hace desde la aplicación: el formulario de registro ignora ese dato. Lo cambia el encargado técnico en la base de datos (campo <code>admin</code> de la tabla <code>usuarios</code>).</dd>
-
-        <dt>Desactivé un servicio, ¿se perdió?</dt>
-        <dd>No. Sigue en el listado del panel con la etiqueta <em>Inactivo</em> y solo deja de verse en el catálogo. Vuelve a activarlo desde <strong>Editar</strong>.</dd>
-
-        <dt>¿Cuál es el precio máximo de un servicio?</dt>
-        <dd>$999.99. La duración va de 10 a 480 minutos (8 horas).</dd>
-
-        <dt>¿Funciona en el celular?</dt>
-        <dd>Sí. Todas las pantallas se adaptan a celular, tableta y computador. En el celular, el menú se abre con <strong>☰</strong> y el listado de servicios del panel se ve en tarjetas.</dd>
-
-        <dt>¿Mis datos están seguros?</dt>
-        <dd>Las contraseñas se guardan cifradas (bcrypt), todos los formularios están protegidos contra envíos falsos (CSRF),
-            el inicio de sesión limita los intentos y las secciones de administración comprueban el rol en cada visita.</dd>
+        <dd>En <strong>Usuarios</strong>, pulsa <strong>Hacer admin</strong> en su fila.</dd>
+        <dt>¿Funciona en el celular? ¿Mis datos están seguros?</dt>
+        <dd>Sí, todas las pantallas se adaptan al celular. Las contraseñas se guardan cifradas, los formularios están protegidos
+            contra envíos falsos y cada cliente solo puede ver y cambiar sus propias citas.</dd>
     </dl>
-    <p class="pie">¿Algo no funciona como dice este manual? Escribe al equipo de desarrollo con la dirección de la página, lo que hiciste y el mensaje que viste.</p>
+    <p class="pie">¿Algo no funciona como dice este manual? Escribe al equipo con la dirección de la página, lo que hiciste y el mensaje que viste.</p>
 </section>
 
 </body>

@@ -8,13 +8,23 @@ Las usa `docs/manual/manual-usuario.html`. Todas se generaron con Chrome headles
 | `02-registro.png` | `/registro` | invitado | 1280 × 800 | Formulario "Crear cuenta" vacío, con asteriscos en los obligatorios |
 | `03-registro-errores.png` | `/registro` (enviado con datos inválidos) | invitado | 1280 × 800 | Campos en rojo con su mensaje: apellido vacío, correo inválido, teléfono de 5 dígitos, contraseña corta. "Ana" se conserva |
 | `04-login.png` | `/login` | invitado | 1280 × 800 | Formulario "Iniciar sesión" con correo y contraseña |
-| `05-panel-admin.png` | `/admin` | admin | 1280 × 800 | Navbar con Panel activo, tarjetas de servicios activos, inactivos y usuarios, botones "Nuevo servicio" y "Ver servicios" |
+| `05-panel-admin.png` | `/admin` | admin | 1280 × 800 | Dashboard de la Entrega Final: citas de hoy, ingresos, clientes, aviso de pendientes y citas del día |
 | `06-listado-servicios.png` | `/admin/servicios` | admin | 1280 × 800 | Tabla con nombre, precio, duración, estado y botones editar/eliminar |
 | `07-crear-servicio.png` | `/admin/servicios/create` | admin | 1280 × 800 | Formulario "Nuevo servicio" con el switch Activo encendido |
 | `08-editar-servicio.png` | `/admin/servicios/{id}/edit` (primer servicio) | admin | 1280 × 800 | Formulario "Editar servicio" con los datos de "Corte de cabello hombre" |
 | `09-confirmar-eliminar.png` | `/admin/servicios` + clic en 🗑 | admin | 1280 × 800 | Modal "Eliminar servicio" con el nombre del servicio y los botones Cancelar/Eliminar |
 | `10-acceso-denegado.png` | `/admin` | cliente | 1280 × 800 | Página 403 "No tienes permiso para ver esta página"; la navbar del cliente no tiene Panel |
 | `11-movil-catalogo.png` | `/` | invitado | 360 × 780 | Catálogo en una columna con el menú colapsado (☰) |
+| `12-reservar-cita.png` | `/citas/nueva` (2 servicios, un día y una hora elegidos) | cliente | 1280 × página completa | Pasos 1–3 de la reserva: servicios marcados, calendario con el día elegido, horas libres y resumen con el total |
+| `13-mis-citas.png` | `/citas` | cliente | 1280 × 800 | Tarjetas de las próximas citas con estado, servicios, total y botones Modificar/Cancelar |
+| `14-agenda-semana.png` | `/admin/agenda?vista=semana` | admin | 1280 × 800 | Agenda de lunes a domingo con las citas de cada día y su estado |
+| `15-citas-filtros.png` | `/admin/citas?estado=pendiente` | admin | 1280 × 800 | Filtros de cliente, estado y fechas, y tabla de citas pendientes con el selector de estado |
+| `16-usuarios.png` | `/admin/usuarios` | admin | 1280 × 800 | Búsqueda, filtros de rol y estado, y botones Desactivar/Activar y Hacer admin |
+| `17-horarios.png` | `/admin/horarios` | admin | 1280 × 800 | Horario semanal editable y fechas bloqueadas |
+| `19-movil-calendario.png` | `/citas/nueva?servicio=1` | cliente | 360 × 780 | Calendario y horas libres en el celular |
+
+Las capturas 12 a 19 (Entrega Final) se tomaron con Chromium (Playwright) sobre la base recién sembrada el 21/11/2026,
+por eso las fechas y los números cambian si se vuelven a generar otro día.
 
 ## Generarlas otra vez
 

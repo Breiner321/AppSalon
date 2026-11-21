@@ -3,11 +3,12 @@
 ## 1. Descripción
 
 AppSalon es un sistema web para un salón de belleza. Los visitantes consultan el catálogo de servicios,
-los clientes crean su cuenta, la confirman por correo e inician sesión, y los administradores gestionan
-los servicios del salón desde un panel propio.
+los clientes crean su cuenta, la confirman por correo y **reservan sus citas en un calendario**, eligiendo
+varios servicios y una hora libre. Los administradores ven el **dashboard**, la **agenda** del día o la
+semana, gestionan citas, usuarios, servicios y horarios, y otras aplicaciones pueden usar la **API REST**.
 
-> **Estado:** Entrega Intermedia (semana 11). La reserva de citas, la API y los reportes son de la
-> Entrega Final (semana 16). Ver [13. Pendientes para la Entrega Final](#13-pendientes-para-la-entrega-final).
+> **Estado:** Entrega Final (semana 16): requerimientos 6 (citas), 7 (panel avanzado) y 8 (API).
+> Los reportes y la exportación (requerimiento 9) quedan pendientes. Ver [13. Pendientes](#13-pendientes).
 
 ![Catálogo de servicios](docs/capturas/01-catalogo.png)
 
@@ -18,10 +19,11 @@ Versiones con las que se desarrolló y probó el proyecto:
 | Capa | Tecnología | Versión |
 |---|---|---|
 | Lenguaje | PHP (`php -v`) | 8.4.27 (compatible desde 8.2, la versión de XAMPP) |
-| Framework | Laravel (`php artisan --version`) | 12.70.2: Eloquent, Blade, Form Requests, middleware, Mail |
+| Framework | Laravel (`php artisan --version`) | 12.70.2: Eloquent, Blade, Form Requests, Policies, middleware, Mail, API Resources |
+| API | Laravel Sanctum | 4.x (tokens Bearer) |
 | Base de datos | MariaDB de XAMPP (`SELECT VERSION();`) | 10.4.32-MariaDB (compatible con MySQL 8) |
 | Interfaz | Bootstrap y Bootstrap Icons por CDN, fuente Poppins | Bootstrap 5.3.3, Icons 1.11.3. No necesita Node ni Vite |
-| Pruebas | PHPUnit | 11.5 (72 pruebas) |
+| Pruebas | PHPUnit | 11.5 (116 pruebas) |
 | Herramientas | Composer, Git y GitHub, phpMyAdmin | Composer 2 |
 
 ## 3. Requisitos
@@ -93,8 +95,14 @@ que crea la base `appsalon_mvc_php` con todas las tablas y los mismos datos de p
 |---|---|---|
 | Administrador | `admin@appsalon.com` | `Admin123` |
 | Cliente | `cliente@appsalon.com` | `Cliente123` |
+| Otros clientes | `camila.rodriguez@correo.com`, `andres.martinez@correo.com`, … | `Cliente123` |
 
-Las dos cuentas ya están confirmadas. Las crea `database/seeders/UserSeeder.php` y también vienen en el script SQL.
+Las crea `database/seeders/UserSeeder.php` y también vienen en el script SQL. Entre los otros clientes,
+`julian.castro@correo.com` está sin confirmar y `paula.moreno@correo.com` está desactivada (sirven para probar
+esos casos). Los datos de prueba incluyen el horario del salón, una fecha bloqueada y unas 150 citas de las
+últimas seis semanas y las próximas tres.
+
+**API:** `POST /api/login` con cualquiera de estas cuentas devuelve el token (ver [docs/api.md](docs/api.md)).
 También puedes registrar clientes nuevos en `/registro` (ver [10. Confirmación de cuenta](#10-confirmación-de-cuenta)).
 
 ## 6. Funcionalidades por rol
@@ -108,14 +116,35 @@ También puedes registrar clientes nuevos en `/registro` (ver [10. Confirmación
   Una cuenta sin confirmar no puede entrar.
 
 ### Cliente
-- Todo lo del visitante, con su nombre en el menú. Después del login va al catálogo.
+- Todo lo del visitante, con su nombre en el menú. Después del login va al catálogo, con botones **Reservar**.
+- **Reservar cita** (`/citas/nueva`): elige uno o varios servicios, un día en el **calendario** (los días cerrados,
+  bloqueados o pasados aparecen deshabilitados) y una de las **horas libres**, que se calculan según la duración
+  total. El resumen muestra la duración y el total. Al reservar recibe un **correo** con el detalle.
+- **Mis citas** (`/citas`): próximas citas con su estado e historial. Puede **modificar** (vuelve a quedar pendiente)
+  o **cancelar** una cita pendiente o confirmada que todavía no empieza. Cada cambio le llega por correo.
 - **Cierre de sesión**, que invalida la sesión.
 - Si intenta entrar al panel de administración, ve la página **403 Acceso denegado**.
 
 ### Administrador
-- **Panel** (`/admin`) con el número de servicios activos, servicios inactivos y usuarios registrados. Después del login va aquí.
+- **Dashboard** (`/admin`): citas de hoy, ingresos de hoy y del mes, clientes, citas pendientes de confirmar y la
+  lista de citas del día. Después del login va aquí.
+- **Agenda** (`/admin/agenda`): vista de día o de semana, con navegación y cambio de estado de cada cita
+  (confirmar, completar, cancelar). Confirmar o cancelar le avisa al cliente por correo.
+- **Citas** (`/admin/citas`): búsqueda por cliente y filtros por estado y rango de fechas.
+- **Usuarios** (`/admin/usuarios`): búsqueda por nombre, correo o teléfono, filtros por rol y estado,
+  **activar o desactivar** cuentas y **cambiar el rol**. Una cuenta desactivada no puede entrar ni usar la API.
 - **CRUD de servicios** (`/admin/servicios`): listado paginado de 10 en 10, crear, editar, activar o desactivar
   (el servicio inactivo no sale en el catálogo) y eliminar con una ventana de confirmación.
+- **Horarios** (`/admin/horarios`): horario de apertura y cierre de cada día y **fechas bloqueadas** (festivos, vacaciones).
+
+### API REST
+- Login con token de **Laravel Sanctum**, `GET /api/servicios`, `GET /api/citas/usuario/{id}`, `POST /api/citas`,
+  `PUT /api/citas/{id}`, cancelar y disponibilidad. Documentación con ejemplos en **[docs/api.md](docs/api.md)**.
+
+### Reglas de la agenda
+- El salón atiende **una cita a la vez**: no se permiten citas que se sobrepongan (las canceladas no cuentan).
+- La cita debe quedar dentro del horario del día, reservarse con 60 minutos de anticipación como mínimo y
+  hasta 60 días adelante. Las horas de inicio van cada 30 minutos. Se cambian en el `.env` (`SALON_*`).
 
 ### Para todos
 - **Diseño responsive** revisado a 360, 768 y 1280 px ([docs/responsive.md](docs/responsive.md)).
@@ -126,17 +155,23 @@ También puedes registrar clientes nuevos en `/registro` (ver [10. Confirmación
 
 ```
 app/
-├── Http/Controllers/   AuthController, ServiceController, AdminController, AppointmentController (Entrega Final)
-├── Http/Middleware/    AdminMiddleware (alias 'admin')
-├── Http/Requests/      RegisterRequest, LoginRequest, ServiceRequest
-├── Mail/               ConfirmarCuenta (correo con el enlace de confirmación)
-├── Models/             User, Service, Appointment, AppointmentService (pivote)
+├── Http/Controllers/   AuthController, ServiceController, AppointmentController, AdminController
+│   ├── Admin/          CitaController (agenda, filtros, estados), UsuarioController, HorarioController
+│   └── Api/            AuthController (token), ServicioController, CitaController
+├── Http/Middleware/    AdminMiddleware ('admin'), EnsureUserIsActive ('activo'), JsonSinEscaparUnicode
+├── Http/Requests/      RegisterRequest, LoginRequest, ServiceRequest, AppointmentRequest
+├── Http/Resources/     ServicioResource, CitaResource, UsuarioResource (JSON de la API)
+├── Mail/               ConfirmarCuenta, CitaNotificacion
+├── Models/             User, Service, Appointment, AppointmentService (pivote), Horario, Bloqueo
+├── Policies/           AppointmentPolicy (dueño de la cita o admin)
+├── Services/           Disponibilidad (reglas de la agenda), ReservaCitas (crear, modificar, cancelar)
 └── Support/            HandlesDatabaseErrors (escrituras seguras con runSafely)
-bootstrap/app.php       middleware: alias 'admin' y redirecciones de invitados y usuarios
+bootstrap/app.php       rutas web y api, alias de middleware, errores JSON de la API
+config/salon.php        reglas de la agenda (intervalo, anticipación, días máximos)
 database/
 ├── factories/          UserFactory, ServiceFactory
 ├── migrations/         usuarios, servicios, citas, citasServicios y tablas de Laravel
-├── seeders/            UserSeeder, ServiceSeeder, AppointmentSeeder
+├── seeders/            UserSeeder, ServiceSeeder, HorarioSeeder, AppointmentSeeder
 └── sql/                appsalon_mvc_php.sql (script completo: estructura y datos)
 docs/                   documentación (manual PDF, seguridad, checklist, revisiones, capturas)
 lang/es/                validación, autenticación, contraseñas y paginación en español
@@ -146,11 +181,13 @@ resources/views/
 ├── components/         <x-alert />, <x-form-error />
 ├── auth/               registro y login
 ├── services/           catálogo público
-├── admin/              panel y CRUD de servicios
-├── emails/             correo de confirmación de cuenta
+├── appointments/       reservar/modificar (calendario) y mis citas
+├── admin/              dashboard, agenda, citas, usuarios, horarios y CRUD de servicios
+├── emails/             confirmación de cuenta y avisos de cita
 └── errors/             403, 404, 419, 429, 500, 4xx y 5xx
 routes/web.php          rutas web (los nombres de ruta son el contrato del equipo)
-tests/Feature/          pruebas de registro, login, confirmación, seguridad, servicios, navegación e interfaz
+routes/api.php          rutas de la API REST
+tests/Feature/          pruebas de autenticación, seguridad, servicios, interfaz, citas, panel, horarios y API
 .env.example            archivo de configuración de ejemplo (sin contraseñas)
 ```
 
@@ -160,8 +197,14 @@ tests/Feature/          pruebas de registro, login, confirmación, seguridad, se
 |---|---|
 | `usuarios` | id, nombre, apellido, email (único), password, telefono, admin, confirmado, token |
 | `servicios` | id, nombre, precio, descripcion, duracion, activo |
-| `citas` | id, fecha, hora, usuarioId → usuarios, total, estado |
+| `citas` | id, fecha, hora, duracion, usuarioId → usuarios, total, estado |
 | `citasServicios` | id, citaId → citas, servicioId → servicios |
+| `horarios` | id, diaSemana (0 domingo … 6 sábado, único), apertura, cierre, abierto |
+| `bloqueos` | id, fecha (única), motivo |
+| `personal_access_tokens` | tokens de la API (Sanctum) |
+
+`usuarios` tiene además la columna `activo`. El diagrama entidad-relación está en el
+[manual técnico](docs/manual-tecnico.md#2-diagrama-de-base-de-datos).
 
 Si se borra un usuario, sus citas quedan con `usuarioId` en NULL. Si se borra una cita o un servicio, sus filas
 de `citasServicios` se borran en cascada.
@@ -176,6 +219,10 @@ de `citasServicios` se borran en cascada.
 - **Permisos:** el middleware `admin` protege `/admin` y todo el CRUD de servicios. Un cliente recibe 403.
 - **Límite de intentos:** 5 por minuto en el login y en el registro. Al sexto se responde 429.
 - **Consultas** con Eloquent (prepared statements), sin SQL concatenado.
+- **Citas:** solo el dueño o un admin pueden verlas o cambiarlas (`AppointmentPolicy`). La disponibilidad se revisa
+  otra vez dentro de una transacción con bloqueo de filas, para evitar dobles reservas simultáneas.
+- **API:** tokens de Sanctum guardados como hash, con vencimiento de 24 h; login limitado a 5 intentos por minuto.
+  Las cuentas desactivadas no pueden entrar ni usar sus tokens.
 
 El detalle de cada requisito, con su archivo y su prueba, está en **[docs/seguridad.md](docs/seguridad.md)**.
 La revisión del CRUD está en [docs/revision-A10.md](docs/revision-A10.md).
@@ -190,8 +237,10 @@ C:\xampp\mysql\bin\mysql.exe -u root -e "CREATE DATABASE appsalon_mvc_php_test C
 php artisan test
 ```
 
-Resultado esperado: **72 pruebas en verde**. Cubren registro, login y logout, confirmación por token, permisos,
-CSRF, throttle, XSS, integridad referencial, CRUD de servicios, catálogo, navegación, interfaz e idioma.
+Resultado esperado: **116 pruebas en verde**. Cubren registro, login y logout, confirmación por token, permisos,
+CSRF, throttle, XSS, integridad referencial, CRUD de servicios, catálogo, navegación, interfaz e idioma, y en la
+Entrega Final la reserva de citas (sobreposición, horario, bloqueos, modificar, cancelar, correos), el panel
+(dashboard, agenda, filtros, usuarios, horarios) y la API.
 
 ## 10. Confirmación de cuenta
 
@@ -219,12 +268,16 @@ El proyecto lo desarrollaron 2 personas. Cada tarea tiene su rama `feature/<ID>-
 
 ## 12. Manual de usuario
 
-**[Manual de usuario (PDF, 5 páginas)](docs/manual/Manual-de-usuario-AppSalon.pdf)**: guía para clientes y administradores.
+**[Manual de usuario (PDF, 5 páginas)](docs/manual/Manual-de-usuario-AppSalon.pdf)**: guía para clientes (cuenta, reserva y gestión de citas)
+y administradores (panel, agenda, citas, usuarios, servicios y horarios).
 
 Otra documentación:
 
 | Documento | Contenido |
 |---|---|
+| **[docs/manual-tecnico.md](docs/manual-tecnico.md)** | **Manual técnico: arquitectura, diagrama de base de datos, reglas de la agenda, seguridad y pruebas** |
+| **[docs/api.md](docs/api.md)** | **Documentación de la API REST con ejemplos** |
+| [docs/checklist-entrega-final.md](docs/checklist-entrega-final.md) | Requisitos de la Entrega Final con su evidencia |
 | [docs/checklist-entrega-intermedia.md](docs/checklist-entrega-intermedia.md) | Requisitos de la rúbrica con su evidencia |
 | [docs/seguridad.md](docs/seguridad.md) | Cada requisito de seguridad, cómo se cumple y qué prueba lo verifica |
 | [docs/convenciones.md](docs/convenciones.md) | Convenciones del backend (`runSafely`, páginas de error) |
@@ -245,13 +298,10 @@ No uses `>` en PowerShell, porque guarda el archivo en UTF-16. En Windows, Maria
 Cámbialo a `citasServicios` en el script para que también funcione en servidores Linux, y vuelve a poner la cabecera
 con las instrucciones y las credenciales.
 
-## 13. Pendientes para la Entrega Final
+## 13. Pendientes
 
-- Reserva de citas por el cliente: calendario, varios servicios por cita, total automático y validación de disponibilidad
-  (las tablas `citas` y `citasServicios` ya existen).
-- Agenda de citas para el administrador y cambio de estado (pendiente, confirmada, completada, cancelada).
+- **Reportes y exportación** (requerimiento 9 de la Entrega Final): reporte de citas por período, ingresos por
+  servicio, exportación a PDF y Excel/CSV, y gráficas.
 - Recuperación de contraseña por correo y reenvío del correo de confirmación.
-- Panel avanzado: estadísticas, gestión de usuarios y reportes con gráficas y exportación.
-- API REST con autenticación por token.
-- Observaciones abiertas de [docs/revision-A10.md](docs/revision-A10.md) y de la sección *Pendientes* del
-  [checklist](docs/checklist-entrega-intermedia.md), como confirmar la unidad del precio con el profesor.
+- Observaciones abiertas de [docs/revision-A10.md](docs/revision-A10.md) y del
+  [checklist de la Entrega Intermedia](docs/checklist-entrega-intermedia.md), como confirmar la unidad del precio con el profesor.

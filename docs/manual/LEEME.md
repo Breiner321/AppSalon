@@ -4,6 +4,8 @@
   una sección por página). Usa las capturas de `docs/capturas/` (ver `docs/capturas/LISTA.md`).
 - `Manual-de-usuario-AppSalon.pdf`: el entregable. **5 páginas** (máximo permitido: 5).
 
+Versión de la Entrega Final: la página 3 explica la reserva y gestión de citas y la página 4 el panel de administración.
+
 ## Regenerar el PDF
 
 En PowerShell, desde la raíz del proyecto:
