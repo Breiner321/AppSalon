@@ -79,7 +79,24 @@ class Appointment extends Model
     public function servicios(): BelongsToMany
     {
         return $this->belongsToMany(Service::class, 'citasServicios', 'citaId', 'servicioId')
-            ->using(AppointmentService::class);
+            ->using(AppointmentService::class)
+            ->withPivot('precio');
+    }
+
+    /**
+     * Deja en la cita exactamente esos servicios, guardando en citasServicios
+     * el precio que tiene cada uno en este momento.
+     *
+     * @param  iterable<Service>  $servicios
+     */
+    public function asignarServicios(iterable $servicios): void
+    {
+        $filas = [];
+        foreach ($servicios as $servicio) {
+            $filas[$servicio->id] = ['precio' => $servicio->precio];
+        }
+
+        $this->servicios()->sync($filas);
     }
 
     /**

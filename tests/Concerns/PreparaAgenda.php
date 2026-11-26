@@ -59,7 +59,7 @@ trait PreparaAgenda
             'total' => $servicio->precio,
             'estado' => $estado,
         ]);
-        $cita->servicios()->attach($servicio->id);
+        $cita->asignarServicios([$servicio]);
 
         return $cita;
     }

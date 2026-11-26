@@ -10,10 +10,12 @@
 
 use App\Http\Controllers\Admin\CitaController as AdminCitaController;
 use App\Http\Controllers\Admin\HorarioController;
+use App\Http\Controllers\Admin\ReporteController;
 use App\Http\Controllers\Admin\UsuarioController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\ServiceController;
 use Illuminate\Support\Facades\Route;
 
@@ -33,6 +35,12 @@ Route::middleware('guest')->group(function () {
 
     // Enlace del correo de confirmación de cuenta (A7).
     Route::get('/confirmar/{token}', [AuthController::class, 'confirmar'])->name('confirmar');
+
+    // Recuperación de contraseña por correo. El enlace vence a los 60 minutos.
+    Route::get('/olvide-contrasena', [PasswordResetController::class, 'solicitar'])->name('password.request');
+    Route::post('/olvide-contrasena', [PasswordResetController::class, 'enviar'])->name('password.email')->middleware('throttle:5,1,password');
+    Route::get('/restablecer-contrasena/{token}', [PasswordResetController::class, 'formulario'])->name('password.reset');
+    Route::post('/restablecer-contrasena', [PasswordResetController::class, 'restablecer'])->name('password.update')->middleware('throttle:5,1,password');
 });
 
 // Rutas que requieren sesión iniciada y cuenta activa.
@@ -72,5 +80,12 @@ Route::middleware(['auth', 'activo', 'admin'])->group(function () {
         Route::put('/horarios', [HorarioController::class, 'update'])->name('horarios.update');
         Route::post('/bloqueos', [HorarioController::class, 'storeBloqueo'])->name('bloqueos.store');
         Route::delete('/bloqueos/{bloqueo}', [HorarioController::class, 'destroyBloqueo'])->name('bloqueos.destroy');
+
+        // Reportes con gráficas y exportación a PDF y CSV (Excel).
+        Route::get('/reportes', [ReporteController::class, 'index'])->name('reportes.index');
+        Route::get('/reportes/citas.pdf', [ReporteController::class, 'citasPdf'])->name('reportes.citas.pdf');
+        Route::get('/reportes/citas.csv', [ReporteController::class, 'citasCsv'])->name('reportes.citas.csv');
+        Route::get('/reportes/ingresos.pdf', [ReporteController::class, 'ingresosPdf'])->name('reportes.ingresos.pdf');
+        Route::get('/reportes/ingresos.csv', [ReporteController::class, 'ingresosCsv'])->name('reportes.ingresos.csv');
     });
 });

@@ -126,6 +126,6 @@ class AppointmentSeeder extends Seeder
         // La reserva se hizo unos días antes de la cita.
         $cita->forceFill(['created_at' => $fecha->copy()->subDays(mt_rand(1, 10))->setTime(mt_rand(8, 20), mt_rand(0, 59))])->save();
 
-        $cita->servicios()->attach($servicios->pluck('id'));
+        $cita->asignarServicios($servicios);
     }
 }

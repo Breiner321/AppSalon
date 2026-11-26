@@ -92,6 +92,12 @@
                                     <i class="bi bi-clock" aria-hidden="true"></i> Horarios
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link @if (request()->routeIs('admin.reportes.*')) active @endif" href="{{ route('admin.reportes.index') }}"
+                                   @if (request()->routeIs('admin.reportes.*')) aria-current="page" @endif>
+                                    <i class="bi bi-bar-chart" aria-hidden="true"></i> Reportes
+                                </a>
+                            </li>
                         @else
                             <li class="nav-item">
                                 <a class="nav-link @if (request()->routeIs('citas.create')) active @endif" href="{{ route('citas.create') }}"

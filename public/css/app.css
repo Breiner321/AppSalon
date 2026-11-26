@@ -400,3 +400,37 @@ h1, h2, h3, .navbar-brand {
     --bs-btn-disabled-color: var(--salon-primary);
     --bs-btn-disabled-border-color: rgba(123, 45, 91, 0.3);
 }
+
+/* Reportes: contenedor de cada gráfica (Chart.js toma su tamaño) y tablas con scroll. */
+.grafica {
+    position: relative;
+    height: 18rem;
+}
+
+.tabla-datos {
+    max-height: 16rem;
+    overflow-y: auto;
+}
+
+.tabla-citas-reporte {
+    max-height: 30rem;
+    overflow-y: auto;
+}
+
+.tabla-citas-reporte thead th {
+    position: sticky;
+    top: 0;
+    background-color: var(--salon-surface);
+}
+
+/* Menú del administrador (9 enlaces): en una sola línea. Entre 1200 y 1399 px se
+   ocultan los íconos del menú para que quepa en el ancho del contenedor. */
+.navbar .nav-link {
+    white-space: nowrap;
+}
+
+@media (min-width: 1200px) and (max-width: 1399.98px) {
+    .navbar-nav .nav-item:not(.dropdown) > .nav-link > .bi {
+        display: none;
+    }
+}

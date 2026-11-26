@@ -51,7 +51,7 @@ class ReservaCitas
                 'total' => $servicios->sum('precio'),
                 'estado' => Appointment::PENDIENTE,
             ]);
-            $cita->servicios()->attach($servicios->pluck('id'));
+            $cita->asignarServicios($servicios);
 
             return $cita;
         });
@@ -82,7 +82,7 @@ class ReservaCitas
                 'total' => $servicios->sum('precio'),
                 'estado' => Appointment::PENDIENTE,
             ]);
-            $cita->servicios()->sync($servicios->pluck('id'));
+            $cita->asignarServicios($servicios);
         });
 
         $this->notificar($cita->refresh(), 'modificada');
