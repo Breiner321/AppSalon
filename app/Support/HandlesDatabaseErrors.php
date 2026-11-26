@@ -6,6 +6,7 @@ use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 use Throwable;
 
 /**
@@ -25,6 +26,10 @@ trait HandlesDatabaseErrors
      * cambios, registra el error en el log y devuelve al formulario anterior con
      * los datos escritos y un mensaje flash 'error' para el usuario.
      *
+     * Una ValidationException (por ejemplo, el horario de una cita se ocupó
+     * mientras el cliente reservaba) no es un error de base de datos: se deja
+     * pasar para que Laravel muestre el mensaje junto al campo.
+     *
      * @template T
      *
      * @param  callable(): T  $callback
@@ -35,6 +40,8 @@ trait HandlesDatabaseErrors
     {
         try {
             return DB::transaction($callback);
+        } catch (ValidationException $e) {
+            throw $e;
         } catch (QueryException $e) {
             Log::error($errorMessage, [
                 'tipo' => 'consulta',

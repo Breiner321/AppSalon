@@ -5,7 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 /**
- * Fila de la tabla pivote citasServicios: un servicio dentro de una cita.
+ * Fila de la tabla pivote citasServicios: un servicio dentro de una cita,
+ * con el precio que tenía al reservar (columna precio).
  */
 class AppointmentService extends Pivot
 {

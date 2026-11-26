@@ -2,5 +2,7 @@
     "Showing": "Mostrando",
     "to": "a",
     "of": "de",
-    "results": "resultados"
+    "results": "resultados",
+    "(and :count more error)": "(y :count error más)",
+    "(and :count more errors)": "(y :count errores más)"
 }

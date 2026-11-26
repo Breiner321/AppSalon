@@ -108,6 +108,7 @@ class AuthController extends Controller
      *
      * Una cuenta sin confirmar (A7) no puede entrar aunque la contraseña sea
      * correcta: se cierra la sesión recién abierta y se le pide confirmar.
+     * Lo mismo pasa con una cuenta desactivada por un administrador.
      */
     public function login(LoginRequest $request): RedirectResponse
     {
@@ -129,6 +130,17 @@ class AuthController extends Controller
                 ->route('login')
                 ->withInput($request->only('email'))
                 ->with('warning', 'Confirma tu cuenta desde el enlace enviado a tu correo');
+        }
+
+        if (! $usuario->isActivo()) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()
+                ->route('login')
+                ->withInput($request->only('email'))
+                ->with('error', 'Tu cuenta está desactivada. Comunícate con el salón.');
         }
 
         $request->session()->regenerate();

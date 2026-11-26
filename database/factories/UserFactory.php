@@ -34,6 +34,7 @@ class UserFactory extends Factory
             'telefono' => fake()->numerify('##########'),
             'admin' => false,
             'confirmado' => true,
+            'activo' => true,
             'token' => null,
         ];
     }
@@ -45,6 +46,16 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'admin' => true,
+        ]);
+    }
+
+    /**
+     * Usuario desactivado por un administrador.
+     */
+    public function inactivo(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'activo' => false,
         ]);
     }
 
