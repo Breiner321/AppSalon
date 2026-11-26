@@ -17,7 +17,7 @@ flowchart LR
     Web --> MW1["Middleware<br/>auth · activo · admin · throttle"]
     Api --> MW2["Middleware<br/>auth:sanctum · activo · throttle"]
 
-    MW1 --> CW["Controladores web<br/>AuthController, ServiceController,<br/>AppointmentController, AdminController,<br/>Admin\\CitaController, Admin\\UsuarioController,<br/>Admin\\HorarioController"]
+    MW1 --> CW["Controladores web<br/>AuthController, PasswordResetController,<br/>ServiceController, AppointmentController,<br/>AdminController, Admin\\CitaController,<br/>Admin\\UsuarioController, Admin\\HorarioController,<br/>Admin\\ReporteController"]
     MW2 --> CA["Controladores API<br/>Api\\AuthController, Api\\ServicioController,<br/>Api\\CitaController"]
 
     CW --> FR["Form Requests<br/>(AppointmentRequest, ...)"]
@@ -25,12 +25,13 @@ flowchart LR
     CW --> POL["AppointmentPolicy"]
     CA --> POL
 
-    FR --> SRV["Servicios de dominio<br/>Disponibilidad · ReservaCitas"]
+    FR --> SRV["Servicios de dominio<br/>Disponibilidad · ReservaCitas · Reportes"]
     CW --> SRV
     CA --> SRV
 
     SRV --> M["Modelos Eloquent<br/>User, Service, Appointment,<br/>AppointmentService, Horario, Bloqueo"]
-    SRV --> MAIL["Mail<br/>CitaNotificacion, ConfirmarCuenta"]
+    SRV --> MAIL["Mail<br/>CitaNotificacion, ConfirmarCuenta,<br/>RestablecerContrasena"]
+    CW --> PDF["Exportación<br/>PDF (dompdf) · CSV"]
     M --> DB[("MySQL / MariaDB<br/>appsalon_mvc_php")]
 
     CW --> V["Vistas Blade"]
@@ -46,10 +47,11 @@ flowchart LR
 | Controladores | `app/Http/Controllers` | Reciben la petición, llaman a validación, permisos y servicios, y devuelven una vista, una redirección o JSON. No contienen reglas de negocio |
 | Validación | `app/Http/Requests` | `RegisterRequest`, `LoginRequest`, `ServiceRequest` y `AppointmentRequest` (formato + disponibilidad) |
 | Permisos | `app/Policies/AppointmentPolicy.php` | Una cita solo la ve, modifica o cancela su dueño o un administrador |
-| Servicios de dominio | `app/Services` | `Disponibilidad` (horario, bloqueos, sobreposición, horas libres) y `ReservaCitas` (crear, modificar, cancelar, cambiar estado y avisar por correo) |
+| Servicios de dominio | `app/Services` | `Disponibilidad` (horario, bloqueos, sobreposición, horas libres), `ReservaCitas` (crear, modificar, cancelar, cambiar estado y avisar por correo) y `Reportes` (consultas agregadas de citas e ingresos) |
 | Modelos | `app/Models` | Tablas, relaciones, conversiones de tipo y ayudas (`Appointment::puedeModificarse()`, `Horario::aMinutos()`) |
 | Respuestas JSON | `app/Http/Resources` | Forma fija del JSON de la API (`ServicioResource`, `CitaResource`, `UsuarioResource`) |
-| Correos | `app/Mail`, `resources/views/emails` | Confirmación de cuenta y avisos de cita |
+| Correos | `app/Mail`, `resources/views/emails` | Confirmación de cuenta, avisos de cita y recuperación de contraseña |
+| Reportes | `Admin\ReporteController`, `resources/views/admin/reportes` | Pantalla con gráficas (Chart.js), PDF (barryvdh/laravel-dompdf) y CSV |
 | Vistas | `resources/views` | Blade: `layouts`, `auth`, `services`, `appointments`, `admin`, `emails`, `errors` |
 | Configuración | `config/salon.php`, `config/sanctum.php` | Reglas ajustables de la agenda y duración de los tokens |
 
@@ -133,6 +135,7 @@ erDiagram
         bigint id PK
         bigint citaId FK "ON DELETE CASCADE"
         bigint servicioId FK "ON DELETE CASCADE"
+        decimal(5_2) precio "al reservar, Entrega Final"
     }
     horarios {
         bigint id PK
@@ -167,6 +170,7 @@ erDiagram
 | `2026_11_20_000002_add_duracion_to_citas_table` | `citas.duracion`, `citas.updated_at`, índice `(fecha, estado)` | Validar la sobreposición sin recalcular la duración de los servicios y consultar la agenda rápido |
 | `2026_11_20_000003_create_horarios_table` | Tablas `horarios` y `bloqueos` | Gestión de horarios y disponibilidad del salón |
 | `2026_11_20_000004_create_personal_access_tokens_table` | Tabla de Sanctum | Tokens de la API |
+| `2026_11_26_000001_add_precio_to_citas_servicios_table` | `citasServicios.precio` | Guardar el precio de cada servicio al reservar, para que los reportes de ingresos no cambien si después se edita el precio |
 
 `citas.duracion` se guarda al reservar: si después se edita la duración de un servicio, las citas ya
 reservadas no cambian. El script completo con datos está en
@@ -234,6 +238,35 @@ cita igual se guarda y el error se registra en el log.
 | Usuarios | `/admin/usuarios?q=&rol=&estado=` | Búsqueda por nombre, correo o teléfono; filtros por rol (cliente/admin) y estado (activo/inactivo/sin confirmar); activar o desactivar y cambiar el rol |
 | Servicios | `/admin/servicios` | CRUD de la Entrega Intermedia |
 | Horarios | `/admin/horarios` | Horario de cada día de la semana y fechas bloqueadas |
+| Reportes | `/admin/reportes?desde=&hasta=&estado=` | Resumen del período, gráficas de citas por día (por estado), ingresos por día e ingresos por servicio; tabla de citas; exportación a PDF y CSV |
+
+### Reportes y exportación
+
+`App\Services\Reportes` hace las consultas con `GROUP BY` en la base (no recorre las citas en PHP):
+
+| Consulta | Qué devuelve |
+|---|---|
+| `resumen()` | Citas por estado, ingresos, ticket promedio, clientes atendidos y tasa de cancelación |
+| `porDia()` | Una fila por día del período, también los días sin citas, con las citas de cada estado y los ingresos |
+| `ingresosPorServicio()` | Veces que se realizó cada servicio, ingresos y porcentaje, de mayor a menor |
+| `citas()` | Detalle de las citas, opcionalmente de un estado |
+
+- **Ingresos** = total de las citas **completadas**. Por servicio se usa el precio guardado en `citasServicios`.
+- Sin filtros se muestra el mes en curso; el período máximo es de 366 días.
+- **PDF** (`/admin/reportes/citas.pdf`, `/admin/reportes/ingresos.pdf`): vistas Blade en `resources/views/admin/reportes/pdf`
+  convertidas con dompdf. dompdf no ejecuta JavaScript, así que las barras del PDF son `div` con ancho proporcional.
+- **CSV** (`/admin/reportes/citas.csv`, `/admin/reportes/ingresos.csv`): UTF-8 con BOM, separador `;` y coma decimal, que es
+  lo que espera Excel configurado en español. Los textos que empiezan por `=`, `+`, `-` o `@` llevan un apóstrofo delante
+  para que Excel no los ejecute como fórmula.
+- **Gráficas**: Chart.js 4.4.1 por CDN. Los colores de los estados vienen de una paleta categórica validada para
+  daltonismo; cada gráfica tiene leyenda o título y una tabla con sus datos (*Ver los datos de la gráfica*).
+
+### Recuperación de contraseña
+
+`PasswordResetController` usa el *password broker* de Laravel con la tabla `password_reset_tokens`:
+`/olvide-contrasena` envía `App\Mail\RestablecerContrasena` (vía `User::sendPasswordResetNotification`) y
+`/restablecer-contrasena/{token}` cambia la contraseña. El enlace vence a los 60 minutos y sirve una vez; la respuesta es la
+misma exista o no el correo. Al restablecer, la cuenta queda confirmada y se revocan sus tokens de la API.
 
 Protecciones: un administrador no puede desactivarse ni quitarse el rol a sí mismo. Desactivar una
 cuenta borra sus tokens de la API, y si tenía la sesión abierta, el middleware `activo` la cierra en su
@@ -254,6 +287,8 @@ regeneradas, middleware `admin`, throttle, Eloquent con prepared statements; ver
 | Fuerza bruta en la API | `POST /api/login` limitado a 5 intentos por minuto; demás rutas 60 por minuto | `routes/api.php` |
 | Cuentas desactivadas | No pueden entrar por la web ni por la API, y se les cierra la sesión abierta | `EnsureUserIsActive`, `AuthController` |
 | Filtración de datos | `password` y `token` ocultos en el modelo y fuera de `UsuarioResource` | `User::$hidden`, `UsuarioResource` |
+| Inyección de fórmulas en Excel | Los textos del CSV que empiezan por `=`, `+`, `-` o `@` se exportan con un apóstrofo delante | `ReporteController::sinFormula` |
+| Robo de cuentas por recuperación de contraseña | Token cifrado, de un solo uso y con vencimiento de 60 min; mismo mensaje exista o no el correo; 5 intentos por minuto | `PasswordResetController` |
 | Mensajes de error con detalles internos | Errores de la API con `{"message": "..."}` en español; detalles solo en el log | `bootstrap/app.php` |
 
 ## 6. Pruebas
@@ -262,7 +297,7 @@ regeneradas, middleware `admin`, throttle, Eloquent con prepared statements; ver
 php artisan test
 ```
 
-**116 pruebas** (72 de la Entrega Intermedia + 44 nuevas) contra la base `appsalon_mvc_php_test`. Las
+**132 pruebas** (72 de la Entrega Intermedia + 60 nuevas) contra la base `appsalon_mvc_php_test`. Las
 nuevas fijan "hoy" en el lunes 7 de diciembre de 2026 (`tests/Concerns/PreparaAgenda.php`) para que el
 resultado no dependa del día en que se corren.
 
@@ -272,6 +307,8 @@ resultado no dependa del día en que se corren.
 | `AdminCitasTest` | Dashboard (citas de hoy, ingresos, clientes), agenda de día y semana, búsqueda y filtros, cambio de estado con correo y transiciones no permitidas |
 | `AdminUsuariosTest` | Búsqueda y filtros, activar/desactivar (login bloqueado, tokens borrados, sesión cerrada), cambio de rol y protección del propio admin |
 | `HorariosTest` | Edición del horario semanal y su efecto en la disponibilidad, validación apertura/cierre, bloqueos |
+| `ReportesTest` | Permisos, resumen e ingresos por servicio (con el precio guardado al reservar), período por defecto y validación, filtro por estado, PDF de citas e ingresos, CSV para Excel y protección contra fórmulas |
+| `RecuperarContrasenaTest` | Envío del enlace, no revelar si el correo existe, restablecer (confirma la cuenta y revoca tokens), enlace vencido o inventado, validación y contenido del correo |
 | `ApiTest` | Login y token, 401/403/404/405/409/422 en JSON, los endpoints de servicios y citas, permisos por usuario, logout y cuentas desactivadas |
 
 ## 7. Despliegue

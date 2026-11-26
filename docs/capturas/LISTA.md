@@ -21,9 +21,11 @@ Las usa `docs/manual/manual-usuario.html`. Todas se generaron con Chrome headles
 | `15-citas-filtros.png` | `/admin/citas?estado=pendiente` | admin | 1280 × 800 | Filtros de cliente, estado y fechas, y tabla de citas pendientes con el selector de estado |
 | `16-usuarios.png` | `/admin/usuarios` | admin | 1280 × 800 | Búsqueda, filtros de rol y estado, y botones Desactivar/Activar y Hacer admin |
 | `17-horarios.png` | `/admin/horarios` | admin | 1280 × 800 | Horario semanal editable y fechas bloqueadas |
+| `18-reportes.png` | `/admin/reportes` | admin | 1280 × 800 | Filtros del período, rangos rápidos, tarjetas de resumen y gráficas de citas e ingresos por día |
 | `19-movil-calendario.png` | `/citas/nueva?servicio=1` | cliente | 360 × 780 | Calendario y horas libres en el celular |
+| `20-olvide-contrasena.png` | `/olvide-contrasena` | invitado | 1280 × 800 | Formulario para pedir el enlace de recuperación de contraseña |
 
-Las capturas 12 a 19 (Entrega Final) se tomaron con Chromium (Playwright) sobre la base recién sembrada el 21/11/2026,
+Las capturas 12 a 20 (Entrega Final) se tomaron con Chromium (Playwright) sobre la base recién sembrada el 21/11/2026,
 por eso las fechas y los números cambian si se vuelven a generar otro día.
 
 ## Generarlas otra vez

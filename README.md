@@ -7,8 +7,8 @@ los clientes crean su cuenta, la confirman por correo y **reservan sus citas en 
 varios servicios y una hora libre. Los administradores ven el **dashboard**, la **agenda** del día o la
 semana, gestionan citas, usuarios, servicios y horarios, y otras aplicaciones pueden usar la **API REST**.
 
-> **Estado:** Entrega Final (semana 16): requerimientos 6 (citas), 7 (panel avanzado) y 8 (API).
-> Los reportes y la exportación (requerimiento 9) quedan pendientes. Ver [13. Pendientes](#13-pendientes).
+> **Estado:** Entrega Final (semana 16) completa: requerimientos 6 (citas), 7 (panel avanzado), 8 (API) y
+> 9 (reportes y exportación), además de la recuperación de contraseña por correo.
 
 ![Catálogo de servicios](docs/capturas/01-catalogo.png)
 
@@ -21,9 +21,10 @@ Versiones con las que se desarrolló y probó el proyecto:
 | Lenguaje | PHP (`php -v`) | 8.4.27 (compatible desde 8.2, la versión de XAMPP) |
 | Framework | Laravel (`php artisan --version`) | 12.70.2: Eloquent, Blade, Form Requests, Policies, middleware, Mail, API Resources |
 | API | Laravel Sanctum | 4.x (tokens Bearer) |
+| Reportes | barryvdh/laravel-dompdf (PDF) y Chart.js por CDN (gráficas) | dompdf 3.x, Chart.js 4.4.1 |
 | Base de datos | MariaDB de XAMPP (`SELECT VERSION();`) | 10.4.32-MariaDB (compatible con MySQL 8) |
 | Interfaz | Bootstrap y Bootstrap Icons por CDN, fuente Poppins | Bootstrap 5.3.3, Icons 1.11.3. No necesita Node ni Vite |
-| Pruebas | PHPUnit | 11.5 (116 pruebas) |
+| Pruebas | PHPUnit | 11.5 (132 pruebas) |
 | Herramientas | Composer, Git y GitHub, phpMyAdmin | Composer 2 |
 
 ## 3. Requisitos
@@ -114,6 +115,8 @@ También puedes registrar clientes nuevos en `/registro` (ver [10. Confirmación
 - **Confirmación de cuenta** con el enlace que llega por correo (`/confirmar/{token}`).
 - **Inicio de sesión** (`/login`). Si los datos son incorrectos, el mensaje no revela si el correo existe.
   Una cuenta sin confirmar no puede entrar.
+- **Recuperar la contraseña** (`/olvide-contrasena`): llega un correo con un enlace que vence a los 60 minutos para
+  elegir una contraseña nueva. Con `MAIL_MAILER=log` el enlace queda en `storage/logs/laravel.log`, como el de confirmación.
 
 ### Cliente
 - Todo lo del visitante, con su nombre en el menú. Después del login va al catálogo, con botones **Reservar**.
@@ -136,6 +139,8 @@ También puedes registrar clientes nuevos en `/registro` (ver [10. Confirmación
 - **CRUD de servicios** (`/admin/servicios`): listado paginado de 10 en 10, crear, editar, activar o desactivar
   (el servicio inactivo no sale en el catálogo) y eliminar con una ventana de confirmación.
 - **Horarios** (`/admin/horarios`): horario de apertura y cierre de cada día y **fechas bloqueadas** (festivos, vacaciones).
+- **Reportes** (`/admin/reportes`): citas por período (por estado y por día) e **ingresos por servicio y por día**, con
+  **gráficas** (Chart.js), y exportación de cada reporte a **PDF** y a **Excel (CSV)**.
 
 ### API REST
 - Login con token de **Laravel Sanctum**, `GET /api/servicios`, `GET /api/citas/usuario/{id}`, `POST /api/citas`,
@@ -155,16 +160,16 @@ También puedes registrar clientes nuevos en `/registro` (ver [10. Confirmación
 
 ```
 app/
-├── Http/Controllers/   AuthController, ServiceController, AppointmentController, AdminController
-│   ├── Admin/          CitaController (agenda, filtros, estados), UsuarioController, HorarioController
+├── Http/Controllers/   AuthController, PasswordResetController, ServiceController, AppointmentController, AdminController
+│   ├── Admin/          CitaController (agenda, filtros, estados), UsuarioController, HorarioController, ReporteController
 │   └── Api/            AuthController (token), ServicioController, CitaController
 ├── Http/Middleware/    AdminMiddleware ('admin'), EnsureUserIsActive ('activo'), JsonSinEscaparUnicode
 ├── Http/Requests/      RegisterRequest, LoginRequest, ServiceRequest, AppointmentRequest
 ├── Http/Resources/     ServicioResource, CitaResource, UsuarioResource (JSON de la API)
-├── Mail/               ConfirmarCuenta, CitaNotificacion
+├── Mail/               ConfirmarCuenta, CitaNotificacion, RestablecerContrasena
 ├── Models/             User, Service, Appointment, AppointmentService (pivote), Horario, Bloqueo
 ├── Policies/           AppointmentPolicy (dueño de la cita o admin)
-├── Services/           Disponibilidad (reglas de la agenda), ReservaCitas (crear, modificar, cancelar)
+├── Services/           Disponibilidad (reglas de la agenda), ReservaCitas (crear, modificar, cancelar), Reportes
 └── Support/            HandlesDatabaseErrors (escrituras seguras con runSafely)
 bootstrap/app.php       rutas web y api, alias de middleware, errores JSON de la API
 config/salon.php        reglas de la agenda (intervalo, anticipación, días máximos)
@@ -179,10 +184,10 @@ public/css/app.css      estilos propios sobre Bootstrap
 resources/views/
 ├── layouts/            layout principal con la navegación por rol
 ├── components/         <x-alert />, <x-form-error />
-├── auth/               registro y login
+├── auth/               registro, login y recuperación de contraseña
 ├── services/           catálogo público
 ├── appointments/       reservar/modificar (calendario) y mis citas
-├── admin/              dashboard, agenda, citas, usuarios, horarios y CRUD de servicios
+├── admin/              dashboard, agenda, citas, usuarios, horarios, reportes (y sus PDF) y CRUD de servicios
 ├── emails/             confirmación de cuenta y avisos de cita
 └── errors/             403, 404, 419, 429, 500, 4xx y 5xx
 routes/web.php          rutas web (los nombres de ruta son el contrato del equipo)
@@ -198,7 +203,7 @@ tests/Feature/          pruebas de autenticación, seguridad, servicios, interfa
 | `usuarios` | id, nombre, apellido, email (único), password, telefono, admin, confirmado, token |
 | `servicios` | id, nombre, precio, descripcion, duracion, activo |
 | `citas` | id, fecha, hora, duracion, usuarioId → usuarios, total, estado |
-| `citasServicios` | id, citaId → citas, servicioId → servicios |
+| `citasServicios` | id, citaId → citas, servicioId → servicios, precio (al reservar) |
 | `horarios` | id, diaSemana (0 domingo … 6 sábado, único), apertura, cierre, abierto |
 | `bloqueos` | id, fecha (única), motivo |
 | `personal_access_tokens` | tokens de la API (Sanctum) |
@@ -237,10 +242,10 @@ C:\xampp\mysql\bin\mysql.exe -u root -e "CREATE DATABASE appsalon_mvc_php_test C
 php artisan test
 ```
 
-Resultado esperado: **116 pruebas en verde**. Cubren registro, login y logout, confirmación por token, permisos,
+Resultado esperado: **132 pruebas en verde**. Cubren registro, login y logout, confirmación por token, permisos,
 CSRF, throttle, XSS, integridad referencial, CRUD de servicios, catálogo, navegación, interfaz e idioma, y en la
 Entrega Final la reserva de citas (sobreposición, horario, bloqueos, modificar, cancelar, correos), el panel
-(dashboard, agenda, filtros, usuarios, horarios) y la API.
+(dashboard, agenda, filtros, usuarios, horarios), la API, los reportes con su exportación y la recuperación de contraseña.
 
 ## 10. Confirmación de cuenta
 
@@ -300,8 +305,8 @@ con las instrucciones y las credenciales.
 
 ## 13. Pendientes
 
-- **Reportes y exportación** (requerimiento 9 de la Entrega Final): reporte de citas por período, ingresos por
-  servicio, exportación a PDF y Excel/CSV, y gráficas.
-- Recuperación de contraseña por correo y reenvío del correo de confirmación.
-- Observaciones abiertas de [docs/revision-A10.md](docs/revision-A10.md) y del
-  [checklist de la Entrega Intermedia](docs/checklist-entrega-intermedia.md), como confirmar la unidad del precio con el profesor.
+- Confirmar con el profesor la unidad del precio (observación abierta del
+  [checklist de la Entrega Intermedia](docs/checklist-entrega-intermedia.md)) y las demás observaciones de
+  [docs/revision-A10.md](docs/revision-A10.md).
+- Reenvío del correo de confirmación de cuenta (mejora opcional; hoy se puede usar *¿Olvidaste tu contraseña?*,
+  que también confirma la cuenta).

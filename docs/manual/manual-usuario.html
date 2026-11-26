@@ -162,6 +162,9 @@
                     <strong>Reservar cita</strong> y <strong>Mis citas</strong>.</li>
                 <li>Para salir, abre el menú con tu nombre y pulsa <strong>Cerrar sesión</strong>. Hazlo siempre en equipos compartidos.</li>
             </ol>
+            <h3>¿Olvidaste tu contraseña?</h3>
+            <p>En el inicio de sesión pulsa <strong>¿Olvidaste tu contraseña?</strong>, escribe tu correo y abre el enlace que te llega.
+                Elige la contraseña nueva (mínimo 6 caracteres). El enlace vence en 60 minutos y sirve una sola vez.</p>
             <h3>Consultar el catálogo</h3>
             <p>Cada tarjeta muestra el servicio, su descripción, la duración en minutos y el precio. Con la sesión iniciada,
                 el botón <strong>Reservar</strong> de una tarjeta abre la reserva con ese servicio ya elegido.</p>
@@ -215,30 +218,31 @@
 
 <!-- 4. Administrador -->
 <section>
-    <h2><span class="seccion-num">4</span>Administrador: panel, agenda, usuarios, servicios y horarios</h2>
+    <h2><span class="seccion-num">4</span>Administrador: panel, agenda, usuarios, horarios y reportes</h2>
     <p>Con una cuenta de administrador llegas al <strong>Panel</strong>. El menú tiene Panel, Agenda, Citas, Usuarios,
-        Gestionar servicios y Horarios.</p>
+        Gestionar servicios, Horarios y Reportes.</p>
 
     <div class="rejilla">
         <figure><img src="../capturas/05-panel-admin.png" alt="Dashboard"><figcaption>Panel: citas de hoy, ingresos, clientes y pendientes.</figcaption></figure>
         <figure><img src="../capturas/14-agenda-semana.png" alt="Agenda semanal"><figcaption>Agenda de la semana.</figcaption></figure>
         <figure><img src="../capturas/16-usuarios.png" alt="Usuarios"><figcaption>Usuarios: búsqueda, filtros, activar y rol.</figcaption></figure>
-        <figure><img src="../capturas/17-horarios.png" alt="Horarios"><figcaption>Horario semanal y fechas bloqueadas.</figcaption></figure>
+        <figure><img src="../capturas/18-reportes.png" alt="Reportes"><figcaption>Reportes: resumen y gráficas del período.</figcaption></figure>
     </div>
 
     <table style="margin-top:0.3cm">
         <tr><th style="width:21%">Sección</th><th>Cómo se usa</th></tr>
         <tr><td><strong>Panel</strong></td><td>Citas de hoy, ingresos de hoy y del mes (citas completadas), clientes y aviso de citas por confirmar (botón <strong>Revisarlas</strong>).</td></tr>
-        <tr><td><strong>Agenda</strong></td><td>Botones <strong>Día</strong> / <strong>Semana</strong>, flechas y <strong>Hoy</strong> para moverte, o elige una fecha.
-            Para cambiar el estado de una cita, elígelo en la lista y pulsa <strong>⟳</strong>. Al confirmar o cancelar, el cliente recibe un correo.
-            Las citas completadas y canceladas ya no cambian.</td></tr>
+        <tr><td><strong>Agenda</strong></td><td><strong>Día</strong> / <strong>Semana</strong>, flechas y <strong>Hoy</strong> para moverte. Para cambiar el estado de una cita,
+            elígelo en la lista y pulsa <strong>⟳</strong>; al confirmar o cancelar, el cliente recibe un correo.</td></tr>
         <tr><td><strong>Citas</strong></td><td>Busca por nombre o correo del cliente y filtra por estado y fechas (<strong>Desde</strong>/<strong>Hasta</strong>). Pulsa <strong>Filtrar</strong>; <strong>✕</strong> quita los filtros.</td></tr>
         <tr><td><strong>Usuarios</strong></td><td>Busca por nombre, correo o teléfono y filtra por rol o estado. <strong>Desactivar</strong> impide que la persona inicie sesión
             (se puede volver a <strong>Activar</strong>). <strong>Hacer admin</strong> / <strong>Hacer cliente</strong> cambia el rol. No puedes cambiar tu propia cuenta.</td></tr>
-        <tr><td><strong>Gestionar servicios</strong></td><td><strong>Nuevo servicio</strong>: nombre (máx. 60), precio (0 a 999.99) y duración (10 a 480 min). El lápiz <strong>✎</strong> edita;
-            apaga <strong>Activo</strong> para ocultarlo del catálogo sin borrarlo. La papelera <strong>🗑</strong> lo elimina tras confirmar.</td></tr>
+        <tr><td><strong>Gestionar servicios</strong></td><td><strong>Nuevo servicio</strong>: nombre, precio (0 a 999.99) y duración (10 a 480 min). <strong>✎</strong> edita;
+            apaga <strong>Activo</strong> para ocultarlo sin borrarlo; <strong>🗑</strong> lo elimina.</td></tr>
         <tr><td><strong>Horarios</strong></td><td>Enciende o apaga cada día y ajusta apertura y cierre; pulsa <strong>Guardar horario</strong>.
             En <strong>Bloquear una fecha</strong> elige el día y un motivo (ej.: festivo). Los cambios no cancelan citas ya reservadas: revísalas en la agenda.</td></tr>
+        <tr><td><strong>Reportes</strong></td><td>Elige <strong>Desde</strong> y <strong>Hasta</strong> (o un rango rápido) y pulsa <strong>Ver reporte</strong>: resumen, gráficas de citas e ingresos por día,
+            ingresos por servicio y lista de citas. Los botones <strong>PDF</strong> y <strong>Excel (CSV)</strong> descargan cada reporte. Los ingresos cuentan solo citas completadas.</td></tr>
     </table>
 </section>
 
@@ -257,9 +261,9 @@
         <tr><td>«Ese horario ya está ocupado»</td><td>Otra persona reservó esa hora mientras elegías. Elige otra hora libre.</td></tr>
         <tr><td>«No quedan horas libres ese día…»</td><td>Tus servicios no caben ese día. Prueba otro día o menos servicios.</td></tr>
         <tr><td>«Esta cita ya no se puede modificar»</td><td>La cita ya pasó, está completada o cancelada.</td></tr>
+        <tr><td>«El enlace para restablecer la contraseña no es válido o ya venció»</td><td>Pide un enlace nuevo en <strong>¿Olvidaste tu contraseña?</strong>.</td></tr>
         <tr><td>«Demasiados intentos» (429)</td><td>Más de 5 intentos de inicio de sesión o registro en un minuto. Espera un minuto.</td></tr>
         <tr><td>«No tienes permiso para ver esta página» (403)</td><td>Entraste a una sección de administración o a una cita que no es tuya.</td></tr>
-        <tr><td>«La página expiró» (419)</td><td>El formulario estuvo abierto mucho tiempo. Recarga la página y envíalo otra vez.</td></tr>
         <tr><td>«Algo salió mal de nuestro lado» (500) o «No pudimos…»</td><td>Falla del servidor o de la base de datos. Intenta en unos minutos; si sigue, avisa al administrador.</td></tr>
     </table>
 
@@ -268,10 +272,8 @@
         <dd>Sí. Marca todos los que quieras: la cita dura la suma de sus duraciones y el total es la suma de sus precios.</dd>
         <dt>¿Por qué no aparece una hora que veo libre en la agenda?</dt>
         <dd>Solo se muestran horas en que caben <em>todos</em> tus servicios sin cruzarse con otra cita y antes del cierre.</dd>
-        <dt>¿Cómo sé que el salón confirmó mi cita?</dt>
-        <dd>Te llega un correo y en <strong>Mis citas</strong> el estado cambia a <em>Confirmada</em>.</dd>
         <dt>Olvidé mi contraseña, ¿cómo la recupero?</dt>
-        <dd>Aún no hay recuperación por correo. Pide ayuda al administrador del salón.</dd>
+        <dd>En <strong>Iniciar sesión</strong>, pulsa <strong>¿Olvidaste tu contraseña?</strong> y sigue el enlace que llega a tu correo.</dd>
         <dt>¿Cómo convierto a un cliente en administrador?</dt>
         <dd>En <strong>Usuarios</strong>, pulsa <strong>Hacer admin</strong> en su fila.</dd>
         <dt>¿Funciona en el celular? ¿Mis datos están seguros?</dt>
