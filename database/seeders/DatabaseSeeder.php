@@ -11,13 +11,14 @@ class DatabaseSeeder extends Seeder
 
     /**
      * Llena la base con los datos de prueba. El orden importa: las citas
-     * necesitan al cliente y a los servicios.
+     * necesitan a los clientes, los servicios y el horario del salón.
      */
     public function run(): void
     {
         $this->call([
             UserSeeder::class,
             ServiceSeeder::class,
+            HorarioSeeder::class,
             AppointmentSeeder::class,
         ]);
     }

@@ -26,6 +26,7 @@
                            autocomplete="current-password"
                            class="form-control @error('password') is-invalid @enderror">
                     <x-form-error field="password" />
+                    <div class="text-end mt-1"><a href="{{ route('password.request') }}" class="small">¿Olvidaste tu contraseña?</a></div>
                 </div>
 
                 <button type="submit" class="btn btn-primary w-100 mt-2">

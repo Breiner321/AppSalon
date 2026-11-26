@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Mail\RestablecerContrasena;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Mail;
+use Laravel\Sanctum\HasApiTokens;
 
 /**
  * Usuario del sistema (cliente o administrador), tabla usuarios.
@@ -18,12 +21,13 @@ use Illuminate\Notifications\Notifiable;
  * @property string|null $telefono
  * @property bool $admin
  * @property bool $confirmado
+ * @property bool $activo Si es false no puede iniciar sesión ni usar la API.
  * @property string|null $token
  */
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
     protected $table = 'usuarios';
 
@@ -34,7 +38,7 @@ class User extends Authenticatable
     protected $rememberTokenName = '';
 
     /**
-     * Atributos asignables en masa. admin, confirmado y token quedan fuera
+     * Atributos asignables en masa. admin, confirmado, activo y token quedan fuera
      * a propósito para que un formulario no pueda modificarlos.
      *
      * @var list<string>
@@ -68,6 +72,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'admin' => 'boolean',
             'confirmado' => 'boolean',
+            'activo' => 'boolean',
         ];
     }
 
@@ -87,5 +92,33 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return $this->admin === true;
+    }
+
+    /**
+     * Indica si la cuenta está activa. Un administrador puede desactivarla
+     * desde /admin/usuarios; la columna vale true por defecto.
+     */
+    public function isActivo(): bool
+    {
+        return $this->activo !== false;
+    }
+
+    /**
+     * Envía el correo en español con el enlace para restablecer la contraseña
+     * (lo llama Password::sendResetLink en PasswordResetController).
+     *
+     * @param  string  $token
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        Mail::to($this)->send(new RestablecerContrasena($this, $token));
+    }
+
+    /**
+     * Nombre y apellido.
+     */
+    public function nombreCompleto(): string
+    {
+        return trim($this->nombre.' '.$this->apellido);
     }
 }
