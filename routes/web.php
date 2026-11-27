@@ -23,6 +23,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [ServiceController::class, 'catalog'])->name('inicio');
 Route::get('/servicios', [ServiceController::class, 'catalog'])->name('servicios.catalogo');
 
+// Documentación interactiva de la API con Swagger UI (especificación en public/api-docs/openapi.yaml).
+Route::view('/api/documentacion', 'api.documentacion')->name('api.documentacion');
+
 // Registro e inicio de sesión: solo para visitantes sin sesión.
 // Los POST admiten 5 intentos por minuto y por IP; el sexto responde 429.
 // El tercer parámetro de throttle separa los contadores de login y de registro.
@@ -58,34 +61,39 @@ Route::middleware(['auth', 'activo'])->group(function () {
     Route::patch('/citas/{cita}/cancelar', [AppointmentController::class, 'cancelar'])->name('citas.cancelar');
 });
 
-// Panel de administración: sesión iniciada, cuenta activa y usuario admin (si no, 403).
-Route::middleware(['auth', 'activo', 'admin'])->group(function () {
+// Panel del salón: sesión iniciada y cuenta activa. El personal (administradores
+// y empleados) ve el panel, la agenda y las citas; lo demás es solo para el
+// administrador. Cualquier otro usuario recibe 403.
+Route::middleware(['auth', 'activo', 'personal'])->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.index');
 
     Route::prefix('admin')->name('admin.')->group(function () {
-        Route::resource('servicios', ServiceController::class)->except('show');
-
         // Citas: agenda del día o la semana, listado con filtros y cambio de estado.
         Route::get('/agenda', [AdminCitaController::class, 'agenda'])->name('agenda');
         Route::get('/citas', [AdminCitaController::class, 'index'])->name('citas.index');
         Route::patch('/citas/{cita}/estado', [AdminCitaController::class, 'cambiarEstado'])->name('citas.estado');
 
-        // Usuarios: búsqueda, filtros, activar o desactivar y cambiar el rol.
-        Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
-        Route::patch('/usuarios/{usuario}/activo', [UsuarioController::class, 'cambiarActivo'])->name('usuarios.activo');
-        Route::patch('/usuarios/{usuario}/rol', [UsuarioController::class, 'cambiarRol'])->name('usuarios.rol');
+        // Solo administradores.
+        Route::middleware('admin')->group(function () {
+            Route::resource('servicios', ServiceController::class)->except('show');
 
-        // Disponibilidad horaria: horario semanal y fechas bloqueadas.
-        Route::get('/horarios', [HorarioController::class, 'index'])->name('horarios.index');
-        Route::put('/horarios', [HorarioController::class, 'update'])->name('horarios.update');
-        Route::post('/bloqueos', [HorarioController::class, 'storeBloqueo'])->name('bloqueos.store');
-        Route::delete('/bloqueos/{bloqueo}', [HorarioController::class, 'destroyBloqueo'])->name('bloqueos.destroy');
+            // Usuarios: búsqueda, filtros, activar o desactivar y asignar el rol.
+            Route::get('/usuarios', [UsuarioController::class, 'index'])->name('usuarios.index');
+            Route::patch('/usuarios/{usuario}/activo', [UsuarioController::class, 'cambiarActivo'])->name('usuarios.activo');
+            Route::patch('/usuarios/{usuario}/rol', [UsuarioController::class, 'cambiarRol'])->name('usuarios.rol');
 
-        // Reportes con gráficas y exportación a PDF y CSV (Excel).
-        Route::get('/reportes', [ReporteController::class, 'index'])->name('reportes.index');
-        Route::get('/reportes/citas.pdf', [ReporteController::class, 'citasPdf'])->name('reportes.citas.pdf');
-        Route::get('/reportes/citas.csv', [ReporteController::class, 'citasCsv'])->name('reportes.citas.csv');
-        Route::get('/reportes/ingresos.pdf', [ReporteController::class, 'ingresosPdf'])->name('reportes.ingresos.pdf');
-        Route::get('/reportes/ingresos.csv', [ReporteController::class, 'ingresosCsv'])->name('reportes.ingresos.csv');
+            // Disponibilidad horaria: horario semanal y fechas bloqueadas.
+            Route::get('/horarios', [HorarioController::class, 'index'])->name('horarios.index');
+            Route::put('/horarios', [HorarioController::class, 'update'])->name('horarios.update');
+            Route::post('/bloqueos', [HorarioController::class, 'storeBloqueo'])->name('bloqueos.store');
+            Route::delete('/bloqueos/{bloqueo}', [HorarioController::class, 'destroyBloqueo'])->name('bloqueos.destroy');
+
+            // Reportes con gráficas y exportación a PDF y CSV (Excel).
+            Route::get('/reportes', [ReporteController::class, 'index'])->name('reportes.index');
+            Route::get('/reportes/citas.pdf', [ReporteController::class, 'citasPdf'])->name('reportes.citas.pdf');
+            Route::get('/reportes/citas.csv', [ReporteController::class, 'citasCsv'])->name('reportes.citas.csv');
+            Route::get('/reportes/ingresos.pdf', [ReporteController::class, 'ingresosPdf'])->name('reportes.ingresos.pdf');
+            Route::get('/reportes/ingresos.csv', [ReporteController::class, 'ingresosCsv'])->name('reportes.ingresos.csv');
+        });
     });
 });

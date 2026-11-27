@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Appointment;
+use App\Models\Service;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\PreparaAgenda;
@@ -17,6 +18,8 @@ class ReportesTest extends TestCase
     use PreparaAgenda, RefreshDatabase;
 
     private User $admin;
+
+    private Service $tinte;
 
     protected function setUp(): void
     {
@@ -37,6 +40,7 @@ class ReportesTest extends TestCase
         $corte->update(['precio' => 999]);
         $corte->update(['nombre' => 'Corte']);
         $tinte->update(['nombre' => 'Tinte']);
+        $this->tinte = $tinte;
     }
 
     /**
@@ -59,6 +63,32 @@ class ReportesTest extends TestCase
     private function periodo(): array
     {
         return ['desde' => '2026-12-01', 'hasta' => '2026-12-31'];
+    }
+
+    public function test_filtra_los_reportes_por_servicio(): void
+    {
+        // Diciembre con Tinte: la completada del 2 (Corte + Tinte) y la cancelada del 3.
+        $filtro = $this->periodo() + ['servicio' => $this->tinte->id];
+
+        $this->actingAs($this->admin)->get(route('admin.reportes.index', $filtro))
+            ->assertOk()
+            ->assertSee('data-test="servicio-filtrado">Tinte<', false)
+            ->assertSee('data-test="citas-total">2<', false)
+            ->assertSee('data-test="ingresos">$120.00<', false)       // solo lo cobrado por el Tinte
+            ->assertSee('servicio='.$this->tinte->id, false);         // las exportaciones conservan el filtro
+
+        $csv = $this->actingAs($this->admin)->get(route('admin.reportes.ingresos.csv', $filtro))->assertOk()->streamedContent();
+        $this->assertStringContainsString('Tinte;1;120,00', $csv);
+        $this->assertStringNotContainsString('Corte', $csv);
+
+        $csvCitas = $this->actingAs($this->admin)->get(route('admin.reportes.citas.csv', $filtro))->streamedContent();
+        $this->assertSame(3, substr_count(trim($csvCitas), "\n") + 1);   // encabezado + 2 citas
+
+        $this->actingAs($this->admin)->get(route('admin.reportes.ingresos.pdf', $filtro))
+            ->assertOk()->assertHeader('content-type', 'application/pdf');
+
+        $this->actingAs($this->admin)->get(route('admin.reportes.index', $this->periodo() + ['servicio' => 99999]))
+            ->assertSessionHasErrors('servicio');
     }
 
     public function test_solo_el_admin_ve_los_reportes(): void

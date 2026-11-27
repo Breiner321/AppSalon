@@ -1,0 +1,441 @@
+openapi: 3.0.3
+info:
+  title: API REST de AppSalon
+  version: 1.0.0
+  description: |
+    API para consultar los servicios del salón y gestionar citas desde otra aplicación
+    (una app móvil, Postman). Usa las mismas reglas que la web: horario del salón,
+    fechas bloqueadas y no sobreposición de citas.
+
+    **Cómo probarla aquí**
+    1. Abre `POST /api/login`, pulsa **Try it out** y luego **Execute** (el ejemplo ya trae la
+       cuenta de prueba `cliente@appsalon.com` / `Cliente123`).
+    2. Copia el valor de `data.token` de la respuesta.
+    3. Pulsa **Authorize** (arriba a la derecha), pega el token y pulsa **Authorize**.
+    4. Ya puedes probar los endpoints con candado, por ejemplo `GET /api/citas/usuario/{usuario}`.
+
+    Todas las respuestas son JSON. Las correctas traen los datos en `data` (y a veces
+    `message` y `meta`); los errores traen `message` y, si son de validación (422), `errors`.
+servers:
+  - url: /api
+    description: Este servidor
+tags:
+  - name: Autenticación
+    description: Token de Laravel Sanctum (dura 24 horas).
+  - name: Servicios
+    description: Catálogo público de servicios activos.
+  - name: Citas
+    description: Reservar, consultar, modificar y cancelar citas.
+
+paths:
+  /login:
+    post:
+      tags: [Autenticación]
+      summary: Iniciar sesión y obtener un token
+      description: Admite 5 intentos por minuto. El mensaje de error no revela si el correo existe.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email, example: cliente@appsalon.com }
+                password: { type: string, format: password, example: Cliente123 }
+                dispositivo: { type: string, description: Nombre con el que se guarda el token (opcional)., example: swagger }
+      responses:
+        '200':
+          description: Sesión iniciada.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: 'Bienvenido, Laura' }
+                  data:
+                    type: object
+                    properties:
+                      token: { type: string, example: '2|f912VukdzzO1xDIGwGxdxf90aRV33G1N7ht9dp5X5232def9' }
+                      tipo: { type: string, example: Bearer }
+                      expiraEl: { type: string, format: date-time, nullable: true }
+                      usuario: { $ref: '#/components/schemas/Usuario' }
+        '401':
+          description: Credenciales incorrectas.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+              example: { message: Credenciales incorrectas }
+        '403': { $ref: '#/components/responses/Prohibido' }
+        '422': { $ref: '#/components/responses/Validacion' }
+        '429': { $ref: '#/components/responses/Limite' }
+
+  /logout:
+    post:
+      tags: [Autenticación]
+      summary: Cerrar sesión (revoca el token usado)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Token revocado.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Mensaje' }
+              example: { message: Sesión cerrada. El token ya no es válido. }
+        '401': { $ref: '#/components/responses/NoAutenticado' }
+
+  /usuario:
+    get:
+      tags: [Autenticación]
+      summary: Datos del dueño del token
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Usuario autenticado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Usuario' }
+        '401': { $ref: '#/components/responses/NoAutenticado' }
+
+  /servicios:
+    get:
+      tags: [Servicios]
+      summary: Listar los servicios activos
+      description: Público (no necesita token). Ordenados por nombre.
+      responses:
+        '200':
+          description: Lista de servicios.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Servicio' }
+                  meta:
+                    type: object
+                    properties:
+                      total: { type: integer, example: 10 }
+
+  /servicios/{id}:
+    get:
+      tags: [Servicios]
+      summary: Ver un servicio activo
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer, example: 1 } }
+      responses:
+        '200':
+          description: El servicio.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Servicio' }
+        '404': { $ref: '#/components/responses/NoEncontrado' }
+
+  /disponibilidad:
+    get:
+      tags: [Citas]
+      summary: Horas libres de un día para unos servicios
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: fecha, in: query, required: true, schema: { type: string, format: date, example: '2026-12-04' } }
+        - name: servicios[]
+          in: query
+          required: true
+          description: Uno o más ids de servicios.
+          style: form
+          explode: true
+          schema:
+            type: array
+            items: { type: integer }
+            example: [1]
+      responses:
+        '200':
+          description: Turnos en los que puede empezar la cita.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      fecha: { type: string, format: date, example: '2026-12-04' }
+                      abierto: { type: boolean, example: true }
+                      motivo: { type: string, nullable: true, description: Motivo si es una fecha bloqueada. }
+                      apertura: { type: string, nullable: true, example: '09:00' }
+                      cierre: { type: string, nullable: true, example: '19:00' }
+                      duracion: { type: integer, example: 45 }
+                      turnos:
+                        type: array
+                        items: { type: string }
+                        example: ['09:00', '16:00', '16:30']
+        '401': { $ref: '#/components/responses/NoAutenticado' }
+        '422': { $ref: '#/components/responses/Validacion' }
+
+  /citas:
+    post:
+      tags: [Citas]
+      summary: Reservar una cita
+      description: |
+        La cita queda **pendiente** y el cliente recibe un correo de confirmación con la fecha,
+        la hora y los servicios. El salón debe atender ese día, la cita debe quedar dentro del
+        horario, con al menos 60 minutos de anticipación, y no puede sobreponerse con otra.
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DatosCita' }
+      responses:
+        '201':
+          description: Cita reservada.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: Cita reservada }
+                  data: { $ref: '#/components/schemas/Cita' }
+        '401': { $ref: '#/components/responses/NoAutenticado' }
+        '422':
+          description: Datos inválidos u horario no disponible.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorValidacion' }
+              example:
+                message: Ese horario ya está ocupado. Elige otra hora.
+                errors: { hora: [Ese horario ya está ocupado. Elige otra hora.] }
+
+  /citas/usuario/{usuario}:
+    get:
+      tags: [Citas]
+      summary: Citas de un usuario
+      description: Un cliente solo puede pedir las suyas; un administrador, las de cualquiera.
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: usuario, in: path, required: true, description: Id del usuario., schema: { type: integer, example: 2 } }
+        - name: estado
+          in: query
+          required: false
+          schema: { type: string, enum: [pendiente, confirmada, completada, cancelada] }
+      responses:
+        '200':
+          description: Citas de la más reciente a la más antigua.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/Cita' }
+                  meta:
+                    type: object
+                    properties:
+                      usuarioId: { type: integer, example: 2 }
+                      total: { type: integer, example: 4 }
+        '401': { $ref: '#/components/responses/NoAutenticado' }
+        '403':
+          description: Las citas son de otro usuario.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+              example: { message: Solo puedes consultar tus propias citas. }
+        '404': { $ref: '#/components/responses/NoEncontrado' }
+
+  /citas/{cita}:
+    get:
+      tags: [Citas]
+      summary: Detalle de una cita (incluye el usuario)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/CitaId'
+      responses:
+        '200':
+          description: La cita.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Cita' }
+        '401': { $ref: '#/components/responses/NoAutenticado' }
+        '403': { $ref: '#/components/responses/Prohibido' }
+        '404': { $ref: '#/components/responses/NoEncontrado' }
+    put:
+      tags: [Citas]
+      summary: Modificar fecha, hora y servicios
+      description: Mismas reglas que al reservar. El horario actual cuenta como libre. La cita vuelve a pendiente y el cliente recibe un correo.
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/CitaId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DatosCita' }
+      responses:
+        '200':
+          description: Cita actualizada.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: Cita actualizada }
+                  data: { $ref: '#/components/schemas/Cita' }
+        '401': { $ref: '#/components/responses/NoAutenticado' }
+        '403': { $ref: '#/components/responses/Prohibido' }
+        '404': { $ref: '#/components/responses/NoEncontrado' }
+        '409': { $ref: '#/components/responses/Conflicto' }
+        '422': { $ref: '#/components/responses/Validacion' }
+
+  /citas/{cita}/cancelar:
+    patch:
+      tags: [Citas]
+      summary: Cancelar una cita
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - $ref: '#/components/parameters/CitaId'
+      responses:
+        '200':
+          description: Cita cancelada.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: Cita cancelada }
+                  data: { $ref: '#/components/schemas/Cita' }
+        '401': { $ref: '#/components/responses/NoAutenticado' }
+        '403': { $ref: '#/components/responses/Prohibido' }
+        '404': { $ref: '#/components/responses/NoEncontrado' }
+        '409': { $ref: '#/components/responses/Conflicto' }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: Token de `POST /api/login` (Laravel Sanctum).
+
+  parameters:
+    CitaId:
+      name: cita
+      in: path
+      required: true
+      description: Id de la cita.
+      schema: { type: integer, example: 1 }
+
+  schemas:
+    Servicio:
+      type: object
+      properties:
+        id: { type: integer, example: 1 }
+        nombre: { type: string, example: Corte de cabello mujer }
+        descripcion: { type: string, nullable: true, example: Corte a la medida con lavado y secado. }
+        precio: { type: number, example: 35 }
+        duracion: { type: integer, description: Minutos., example: 45 }
+        activo: { type: boolean, example: true }
+
+    Usuario:
+      type: object
+      properties:
+        id: { type: integer, example: 2 }
+        nombre: { type: string, example: Laura }
+        apellido: { type: string, example: Gomez }
+        email: { type: string, format: email, example: cliente@appsalon.com }
+        telefono: { type: string, nullable: true, example: '3007654321' }
+        admin: { type: boolean, example: false }
+        rol: { type: string, enum: [cliente, empleado, admin], example: cliente }
+
+    Cita:
+      type: object
+      properties:
+        id: { type: integer, example: 149 }
+        fecha: { type: string, format: date, example: '2026-12-04' }
+        hora: { type: string, example: '10:00' }
+        horaFin: { type: string, example: '11:25' }
+        duracion: { type: integer, description: Minutos (suma de los servicios)., example: 85 }
+        total: { type: number, description: Suma de los precios., example: 57 }
+        estado: { type: string, enum: [pendiente, confirmada, completada, cancelada], example: pendiente }
+        modificable: { type: boolean, description: Si todavía se puede modificar o cancelar., example: true }
+        usuarioId: { type: integer, nullable: true, example: 2 }
+        usuario: { $ref: '#/components/schemas/Usuario' }
+        servicios:
+          type: array
+          items: { $ref: '#/components/schemas/Servicio' }
+        creadaEl: { type: string, format: date-time }
+
+    DatosCita:
+      type: object
+      required: [fecha, hora, servicios]
+      properties:
+        fecha: { type: string, format: date, description: Desde hoy y hasta 60 días adelante., example: '2026-12-04' }
+        hora: { type: string, description: 'HH:MM (también se acepta HH:MM:00).', example: '10:00' }
+        servicios:
+          type: array
+          description: De 1 a 10 ids de servicios activos, sin repetir.
+          items: { type: integer }
+          example: [1, 7]
+
+    Mensaje:
+      type: object
+      properties:
+        message: { type: string }
+
+    Error:
+      type: object
+      properties:
+        message: { type: string }
+
+    ErrorValidacion:
+      type: object
+      properties:
+        message: { type: string }
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items: { type: string }
+
+  responses:
+    NoAutenticado:
+      description: Falta el token, no es válido o expiró.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { message: 'No autenticado. Envía el token en la cabecera Authorization: Bearer <token>.' }
+    Prohibido:
+      description: No tienes permiso (recurso ajeno, cuenta sin confirmar o desactivada).
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NoEncontrado:
+      description: El recurso no existe.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example: { message: Recurso no encontrado. }
+    Conflicto:
+      description: La cita ya no se puede modificar o cancelar (ya pasó, está cancelada o completada).
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Validacion:
+      description: Datos inválidos.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorValidacion' }
+    Limite:
+      description: Demasiadas peticiones.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }

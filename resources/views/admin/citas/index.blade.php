@@ -23,12 +23,22 @@
 
     <form method="GET" action="{{ route('admin.citas.index') }}" class="filtros p-3 mb-4" role="search">
         <div class="row g-2 align-items-end">
-            <div class="col-12 col-md-4">
+            <div class="col-12 col-md-2">
                 <label for="q" class="form-label small mb-1">Cliente</label>
                 <input type="search" name="q" id="q" maxlength="60" class="form-control"
                        placeholder="Nombre o correo" value="{{ $filtros['q'] ?? '' }}">
             </div>
-            <div class="col-12 col-sm-4 col-md-2">
+            <div class="col-12 col-sm-6 col-md-2">
+                <label for="servicio" class="form-label small mb-1">Servicio</label>
+                <select name="servicio" id="servicio" class="form-select @error('servicio') is-invalid @enderror">
+                    <option value="">Todos</option>
+                    @foreach ($servicios as $s)
+                        <option value="{{ $s->id }}" @selected((int) ($filtros['servicio'] ?? 0) === $s->id)>{{ $s->nombre }}</option>
+                    @endforeach
+                </select>
+                <x-form-error field="servicio" />
+            </div>
+            <div class="col-12 col-sm-6 col-md-2">
                 <label for="estado" class="form-label small mb-1">Estado</label>
                 <select name="estado" id="estado" class="form-select">
                     <option value="">Todos</option>
@@ -37,11 +47,11 @@
                     @endforeach
                 </select>
             </div>
-            <div class="col-6 col-sm-4 col-md-2">
+            <div class="col-6 col-md-2">
                 <label for="desde" class="form-label small mb-1">Desde</label>
                 <input type="date" name="desde" id="desde" class="form-control" value="{{ $filtros['desde'] ?? '' }}">
             </div>
-            <div class="col-6 col-sm-4 col-md-2">
+            <div class="col-6 col-md-2">
                 <label for="hasta" class="form-label small mb-1">Hasta</label>
                 <input type="date" name="hasta" id="hasta" class="form-control @error('hasta') is-invalid @enderror" value="{{ $filtros['hasta'] ?? '' }}">
                 <x-form-error field="hasta" />

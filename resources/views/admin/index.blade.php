@@ -2,7 +2,7 @@
      Recibe los conteos y $citasHoy desde AdminController@index. --}}
 @extends('layouts.app')
 
-@section('title', 'Panel de administración')
+@section('title', auth()->user()->isAdmin() ? 'Panel de administración' : 'Panel del salón')
 
 @php
     $tarjetas = [
@@ -26,19 +26,25 @@
 
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
-            <h1 class="mb-1">Panel de administración</h1>
+            <h1 class="mb-1">{{ auth()->user()->isAdmin() ? 'Panel de administración' : 'Panel del salón' }}</h1>
             <p class="text-body-secondary mb-0">Hola, {{ auth()->user()->nombre }}. Este es el resumen del salón.</p>
         </div>
         <div class="d-flex flex-column flex-sm-row gap-2">
             <a href="{{ route('admin.agenda') }}" class="btn btn-primary">
                 <i class="bi bi-calendar-week" aria-hidden="true"></i> Ver agenda
             </a>
-            <a href="{{ route('admin.servicios.create') }}" class="btn btn-outline-primary">
-                <i class="bi bi-plus-lg" aria-hidden="true"></i> Nuevo servicio
-            </a>
-            <a href="{{ route('admin.servicios.index') }}" class="btn btn-outline-primary">
-                <i class="bi bi-list-check" aria-hidden="true"></i> Ver servicios
-            </a>
+            @if (auth()->user()->isAdmin())
+                <a href="{{ route('admin.servicios.create') }}" class="btn btn-outline-primary">
+                    <i class="bi bi-plus-lg" aria-hidden="true"></i> Nuevo servicio
+                </a>
+                <a href="{{ route('admin.servicios.index') }}" class="btn btn-outline-primary">
+                    <i class="bi bi-list-check" aria-hidden="true"></i> Ver servicios
+                </a>
+            @else
+                <a href="{{ route('admin.citas.index') }}" class="btn btn-outline-primary">
+                    <i class="bi bi-calendar-check" aria-hidden="true"></i> Ver citas
+                </a>
+            @endif
         </div>
     </div>
 

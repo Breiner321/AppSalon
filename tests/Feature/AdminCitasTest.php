@@ -104,6 +104,21 @@ class AdminCitasTest extends TestCase
             ->assertSessionHasErrors('hasta');
     }
 
+    public function test_filtra_citas_por_servicio(): void
+    {
+        $conCorte = $this->citaExistente('2026-12-08', '10:00:00');
+        $otra = $this->citaExistente('2026-12-08', '12:00:00');
+        $corte = $conCorte->servicios->first();
+
+        $this->actingAs($this->admin)->get(route('admin.citas.index', ['servicio' => $corte->id]))
+            ->assertOk()
+            ->assertSee('data-test="cita-'.$conCorte->id.'"', false)
+            ->assertDontSee('data-test="cita-'.$otra->id.'"', false);
+
+        $this->actingAs($this->admin)->get(route('admin.citas.index', ['servicio' => 'abc']))
+            ->assertSessionHasErrors('servicio');
+    }
+
     public function test_confirma_una_cita_y_avisa_al_cliente(): void
     {
         $cliente = User::factory()->create();

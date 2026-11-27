@@ -23,7 +23,7 @@
     @endguest
 
     @auth
-        @unless (auth()->user()->isAdmin())
+        @unless (auth()->user()->esPersonal())
             <div class="cta-registro d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 p-3 mb-4">
                 <div>
                     <h2 class="h5 mb-1">¿Lista o listo para tu próxima visita?</h2>
@@ -59,7 +59,7 @@
                                 <span class="precio fs-5">${{ number_format((float) $servicio->precio, 2) }}</span>
                             </div>
                             @auth
-                                @unless (auth()->user()->isAdmin())
+                                @unless (auth()->user()->esPersonal())
                                     <a href="{{ route('citas.create', ['servicio' => $servicio->id]) }}" class="btn btn-outline-primary mt-3"
                                        aria-label="Reservar {{ $servicio->nombre }}">
                                         <i class="bi bi-calendar-plus" aria-hidden="true"></i> Reservar

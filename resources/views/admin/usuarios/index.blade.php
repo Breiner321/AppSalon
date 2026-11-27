@@ -26,8 +26,9 @@
                 <label for="rol" class="form-label small mb-1">Rol</label>
                 <select name="rol" id="rol" class="form-select">
                     <option value="">Todos</option>
-                    <option value="cliente" @selected(($filtros['rol'] ?? '') === 'cliente')>Cliente</option>
-                    <option value="admin" @selected(($filtros['rol'] ?? '') === 'admin')>Administrador</option>
+                    @foreach ($roles as $valor => $nombre)
+                        <option value="{{ $valor }}" @selected(($filtros['rol'] ?? '') === $valor)>{{ $nombre }}</option>
+                    @endforeach
                 </select>
             </div>
             <div class="col-6 col-md-2">
@@ -78,6 +79,8 @@
                                 <td>
                                     @if ($usuario->isAdmin())
                                         <span class="badge text-bg-primary">Administrador</span>
+                                    @elseif ($usuario->isEmpleado())
+                                        <span class="badge text-bg-info">Empleado</span>
                                     @else
                                         <span class="badge text-bg-light border">Cliente</span>
                                     @endif
@@ -109,14 +112,19 @@
                                                 </button>
                                             @endif
                                         </form>
-                                        <form method="POST" action="{{ route('admin.usuarios.rol', $usuario) }}" class="d-inline">
+                                        <form method="POST" action="{{ route('admin.usuarios.rol', $usuario) }}" class="d-inline-flex gap-1 align-items-center">
                                             @csrf
                                             @method('PATCH')
-                                            <button type="submit" class="btn btn-outline-primary btn-sm"
-                                                    title="{{ $usuario->isAdmin() ? 'Hacer cliente' : 'Hacer administrador' }}"
-                                                    aria-label="{{ $usuario->isAdmin() ? 'Hacer cliente' : 'Hacer administrador' }} a {{ $usuario->nombreCompleto() }}">
-                                                <i class="bi {{ $usuario->isAdmin() ? 'bi-person' : 'bi-shield-check' }}" aria-hidden="true"></i>
-                                                <span class="d-none d-xl-inline">{{ $usuario->isAdmin() ? 'Hacer cliente' : 'Hacer admin' }}</span>
+                                            <label for="rol-{{ $usuario->id }}" class="visually-hidden">Rol de {{ $usuario->nombreCompleto() }}</label>
+                                            <select name="rol" id="rol-{{ $usuario->id }}" class="form-select form-select-sm w-auto">
+                                                @foreach ($roles as $valor => $nombre)
+                                                    <option value="{{ $valor }}" @selected($usuario->rol() === $valor)>{{ $nombre }}</option>
+                                                @endforeach
+                                            </select>
+                                            <button type="submit" class="btn btn-outline-primary btn-sm" title="Asignar rol"
+                                                    aria-label="Asignar rol a {{ $usuario->nombreCompleto() }}">
+                                                <i class="bi bi-shield-check" aria-hidden="true"></i>
+                                                <span class="d-none d-xl-inline">Asignar</span>
                                             </button>
                                         </form>
                                     @endunless

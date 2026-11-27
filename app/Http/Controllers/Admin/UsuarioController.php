@@ -7,11 +7,12 @@ use App\Models\User;
 use App\Support\HandlesDatabaseErrors;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /**
  * Gestión de usuarios del panel: búsqueda, filtros, activar o desactivar la
- * cuenta y cambiar el rol (cliente o administrador).
+ * cuenta y asignar el rol (cliente, empleado o administrador).
  */
 class UsuarioController extends Controller
 {
@@ -25,7 +26,7 @@ class UsuarioController extends Controller
     {
         $filtros = $request->validate([
             'q' => ['nullable', 'string', 'max:60'],
-            'rol' => ['nullable', 'in:admin,cliente'],
+            'rol' => ['nullable', Rule::in(array_keys(User::ROLES))],
             'estado' => ['nullable', 'in:activo,inactivo,sin_confirmar'],
         ]);
 
@@ -40,7 +41,8 @@ class UsuarioController extends Controller
                 });
             })
             ->when(($filtros['rol'] ?? null) === 'admin', fn ($q) => $q->where('admin', true))
-            ->when(($filtros['rol'] ?? null) === 'cliente', fn ($q) => $q->where('admin', false))
+            ->when(($filtros['rol'] ?? null) === 'empleado', fn ($q) => $q->where('admin', false)->where('empleado', true))
+            ->when(($filtros['rol'] ?? null) === 'cliente', fn ($q) => $q->clientes())
             ->when(($filtros['estado'] ?? null) === 'activo', fn ($q) => $q->where('activo', true))
             ->when(($filtros['estado'] ?? null) === 'inactivo', fn ($q) => $q->where('activo', false))
             ->when(($filtros['estado'] ?? null) === 'sin_confirmar', fn ($q) => $q->where('confirmado', false))
@@ -49,7 +51,11 @@ class UsuarioController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('admin.usuarios.index', compact('usuarios', 'filtros'));
+        return view('admin.usuarios.index', [
+            'usuarios' => $usuarios,
+            'filtros' => $filtros,
+            'roles' => User::ROLES,
+        ]);
     }
 
     /**
@@ -82,8 +88,8 @@ class UsuarioController extends Controller
     }
 
     /**
-     * Cambia el rol entre cliente y administrador. Nadie puede quitarse a sí
-     * mismo el rol de administrador (el salón se quedaría sin acceso al panel).
+     * Asigna uno de los roles: cliente, empleado o administrador. Nadie puede
+     * cambiarse su propio rol (el salón podría quedarse sin acceso al panel).
      */
     public function cambiarRol(Request $request, User $usuario): RedirectResponse
     {
@@ -91,10 +97,12 @@ class UsuarioController extends Controller
             return back()->with('warning', 'No puedes cambiar tu propio rol.');
         }
 
-        $admin = ! $usuario->isAdmin();
+        $rol = $request->validate([
+            'rol' => ['required', Rule::in(array_keys(User::ROLES))],
+        ])['rol'];
 
         $resultado = $this->runSafely(
-            fn () => $usuario->forceFill(['admin' => $admin])->save(),
+            fn () => $usuario->asignarRol($rol)->save(),
             'No pudimos cambiar el rol del usuario. Intenta de nuevo.'
         );
 
@@ -102,6 +110,6 @@ class UsuarioController extends Controller
             return $resultado;
         }
 
-        return back()->with('success', $usuario->nombreCompleto().($admin ? ' ahora es administrador' : ' ahora es cliente'));
+        return back()->with('success', $usuario->nombreCompleto().' ahora tiene el rol '.mb_strtolower(User::ROLES[$rol]));
     }
 }

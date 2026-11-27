@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\JsonSinEscaparUnicode;
+use App\Http\Middleware\PersonalMiddleware;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
@@ -23,9 +24,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // 'admin': solo administradores. 'activo': saca a las cuentas desactivadas.
+        // 'admin': solo administradores. 'personal': administradores y empleados.
+        // 'activo': saca a las cuentas desactivadas.
         $middleware->alias([
             'admin' => AdminMiddleware::class,
+            'personal' => PersonalMiddleware::class,
             'activo' => EnsureUserIsActive::class,
         ]);
 

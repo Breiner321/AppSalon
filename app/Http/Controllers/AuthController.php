@@ -167,12 +167,13 @@ class AuthController extends Controller
     }
 
     /**
-     * Página de inicio de cada rol: el admin va al panel y el cliente al catálogo.
+     * Página de inicio de cada rol: el administrador y el empleado van al panel
+     * y el cliente al catálogo.
      * También la usa redirectUsersTo en bootstrap/app.php.
      */
     public static function inicioSegunRol(?User $usuario): string
     {
-        return $usuario?->isAdmin()
+        return $usuario?->esPersonal()
             ? route('admin.index')
             : route('servicios.catalogo');
     }

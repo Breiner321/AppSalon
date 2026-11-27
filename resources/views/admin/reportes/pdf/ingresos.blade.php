@@ -1,5 +1,5 @@
 {{-- Reporte de ingresos por servicio y por día en PDF (Admin\ReporteController@ingresosPdf).
-     Recibe $desde, $hasta, $resumen, $porServicio y $porDia (solo días con ingresos).
+     Recibe $desde, $hasta, $servicio (filtro opcional), $resumen, $porServicio y $porDia (solo días con ingresos).
      Las barras son divs con ancho proporcional: dompdf no ejecuta JavaScript. --}}
 <!DOCTYPE html>
 <html lang="es">
@@ -13,7 +13,10 @@
 
     <div class="marca">✂ {{ config('app.name') }}</div>
     <h1>Reporte de ingresos</h1>
-    <p class="suave">Período: {{ $desde->format('d/m/Y') }} al {{ $hasta->format('d/m/Y') }}</p>
+    <p class="suave">
+        Período: {{ $desde->format('d/m/Y') }} al {{ $hasta->format('d/m/Y') }}
+        @if ($servicio) · Servicio: {{ $servicio->nombre }} @endif
+    </p>
 
     <table class="resumen">
         <tr>

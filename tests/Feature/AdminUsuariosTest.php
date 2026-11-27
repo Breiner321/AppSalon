@@ -8,7 +8,7 @@ use Tests\TestCase;
 
 /**
  * Gestión de usuarios del panel (requerimiento 7): búsqueda, filtros,
- * activar o desactivar y cambiar el rol.
+ * activar o desactivar y asignar el rol (cliente, empleado o administrador).
  */
 class AdminUsuariosTest extends TestCase
 {
@@ -77,21 +77,48 @@ class AdminUsuariosTest extends TestCase
         $this->assertGuest();
     }
 
-    public function test_cambia_el_rol(): void
+    public function test_asigna_los_tres_roles(): void
     {
+        $usuario = User::factory()->create();
+        $asignar = fn (string $rol) => $this->actingAs($this->admin)->patch(route('admin.usuarios.rol', $usuario), ['rol' => $rol]);
+
+        $asignar('empleado')->assertSessionHas('success');
+        $this->assertSame('empleado', $usuario->refresh()->rol());
+        $this->assertTrue($usuario->esPersonal());
+
+        $asignar('admin');
+        $this->assertSame('admin', $usuario->refresh()->rol());
+        $this->assertFalse((bool) $usuario->empleado);
+
+        $asignar('cliente');
+        $this->assertSame('cliente', $usuario->refresh()->rol());
+        $this->assertFalse($usuario->esPersonal());
+
+        $asignar('superusuario')->assertSessionHasErrors('rol');
+        $this->assertSame('cliente', $usuario->refresh()->rol());
+    }
+
+    public function test_filtra_por_rol_empleado(): void
+    {
+        $empleado = User::factory()->empleado()->create();
         $cliente = User::factory()->create();
+        $fila = fn (User $u) => 'data-test="usuario-'.$u->id.'"';
 
-        $this->actingAs($this->admin)->patch(route('admin.usuarios.rol', $cliente))->assertSessionHas('success');
-        $this->assertTrue($cliente->refresh()->isAdmin());
+        $this->actingAs($this->admin)->get(route('admin.usuarios.index', ['rol' => 'empleado']))
+            ->assertOk()
+            ->assertSee($fila($empleado), false)
+            ->assertDontSee($fila($cliente), false)
+            ->assertDontSee($fila($this->admin), false);
 
-        $this->actingAs($this->admin)->patch(route('admin.usuarios.rol', $cliente));
-        $this->assertFalse($cliente->refresh()->isAdmin());
+        $this->actingAs($this->admin)->get(route('admin.usuarios.index', ['rol' => 'cliente']))
+            ->assertSee($fila($cliente), false)
+            ->assertDontSee($fila($empleado), false);
     }
 
     public function test_el_admin_no_puede_desactivarse_ni_quitarse_el_rol(): void
     {
         $this->actingAs($this->admin)->patch(route('admin.usuarios.activo', $this->admin))->assertSessionHas('warning');
-        $this->actingAs($this->admin)->patch(route('admin.usuarios.rol', $this->admin))->assertSessionHas('warning');
+        $this->actingAs($this->admin)->patch(route('admin.usuarios.rol', $this->admin), ['rol' => 'cliente'])->assertSessionHas('warning');
 
         $this->admin->refresh();
         $this->assertTrue($this->admin->activo);

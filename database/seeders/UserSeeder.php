@@ -6,7 +6,7 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 
 /**
- * Cuentas para probar la aplicación: un administrador, la cliente de prueba
+ * Cuentas para probar la aplicación: un administrador, una empleada, la cliente de prueba
  * y ocho clientes más con datos realistas (uno sin confirmar y uno desactivado),
  * para que la agenda, la búsqueda y los filtros tengan datos.
  */
@@ -14,9 +14,9 @@ class UserSeeder extends Seeder
 {
     /**
      * Crea o actualiza las cuentas por su email. Todas usan la contraseña
-     * Cliente123 salvo el administrador (Admin123).
+     * Cliente123 salvo el administrador (Admin123) y la empleada (Empleado123).
      *
-     * admin y confirmado están fuera de $fillable (para que un formulario no
+     * admin, empleado y confirmado están fuera de $fillable (para que un formulario no
      * pueda cambiarlos), por eso la asignación se hace dentro de unguarded().
      * El cast 'hashed' del modelo aplica bcrypt a la contraseña.
      */
@@ -65,11 +65,22 @@ class UserSeeder extends Seeder
             ];
         }
 
+        // La empleada va al final para no cambiar los ids de las cuentas anteriores.
+        $usuarios[] = [
+            'nombre' => 'Sofía',
+            'apellido' => 'Vargas',
+            'email' => 'empleado@appsalon.com',
+            'password' => 'Empleado123',
+            'telefono' => '3009876543',
+            'admin' => false,
+            'empleado' => true,
+        ];
+
         User::unguarded(function () use ($usuarios) {
             foreach ($usuarios as $datos) {
                 User::updateOrCreate(
                     ['email' => $datos['email']],
-                    $datos + ['confirmado' => true, 'activo' => true],
+                    $datos + ['empleado' => false, 'confirmado' => true, 'activo' => true],
                 );
             }
         });

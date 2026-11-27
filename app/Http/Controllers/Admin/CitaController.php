@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
+use App\Models\Service;
 use App\Services\ReservaCitas;
 use App\Support\HandlesDatabaseErrors;
 use Illuminate\Http\RedirectResponse;
@@ -33,7 +34,7 @@ class CitaController extends Controller
 
     /**
      * Listado de citas con búsqueda por cliente (nombre, apellido o correo) y
-     * filtros por estado y rango de fechas.
+     * filtros por estado, rango de fechas y servicio.
      */
     public function index(Request $request): View
     {
@@ -42,8 +43,11 @@ class CitaController extends Controller
             'estado' => ['nullable', Rule::in(Appointment::ESTADOS)],
             'desde' => ['nullable', 'date_format:Y-m-d'],
             'hasta' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:desde'],
+            'servicio' => ['nullable', 'integer', 'exists:servicios,id'],
         ], [
             'hasta.after_or_equal' => 'La fecha "hasta" debe ser igual o posterior a la fecha "desde".',
+            'servicio.integer' => 'El servicio elegido no es válido.',
+            'servicio.exists' => 'El servicio elegido no existe.',
         ]);
 
         $citas = Appointment::with(['usuario', 'servicios'])
@@ -58,12 +62,17 @@ class CitaController extends Controller
             ->when($filtros['estado'] ?? null, fn ($q, string $estado) => $q->where('estado', $estado))
             ->when($filtros['desde'] ?? null, fn ($q, string $desde) => $q->whereDate('fecha', '>=', $desde))
             ->when($filtros['hasta'] ?? null, fn ($q, string $hasta) => $q->whereDate('fecha', '<=', $hasta))
+            ->when($filtros['servicio'] ?? null, fn ($q, $servicio) => $q->whereHas('servicios', fn ($s) => $s->whereKey((int) $servicio)))
             ->orderByDesc('fecha')
             ->orderBy('hora')
             ->paginate(15)
             ->withQueryString();
 
-        return view('admin.citas.index', compact('citas', 'filtros'));
+        return view('admin.citas.index', [
+            'citas' => $citas,
+            'filtros' => $filtros,
+            'servicios' => Service::orderBy('nombre')->get(['id', 'nombre']),
+        ]);
     }
 
     /**

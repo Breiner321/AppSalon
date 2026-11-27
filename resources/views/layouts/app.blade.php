@@ -55,7 +55,7 @@
                     @endguest
 
                     @auth
-                        @if (auth()->user()->isAdmin())
+                        @if (auth()->user()->esPersonal())
                             <li class="nav-item">
                                 <a class="nav-link @if (request()->routeIs('admin.index')) active @endif" href="{{ route('admin.index') }}"
                                    @if (request()->routeIs('admin.index')) aria-current="page" @endif>
@@ -74,30 +74,32 @@
                                     <i class="bi bi-calendar-check" aria-hidden="true"></i> Citas
                                 </a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link @if (request()->routeIs('admin.usuarios.*')) active @endif" href="{{ route('admin.usuarios.index') }}"
-                                   @if (request()->routeIs('admin.usuarios.*')) aria-current="page" @endif>
-                                    <i class="bi bi-people" aria-hidden="true"></i> Usuarios
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link @if (request()->routeIs('admin.servicios.*')) active @endif" href="{{ route('admin.servicios.index') }}"
-                                   @if (request()->routeIs('admin.servicios.*')) aria-current="page" @endif>
-                                    <i class="bi bi-list-check" aria-hidden="true"></i> Gestionar servicios
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link @if (request()->routeIs('admin.horarios.*')) active @endif" href="{{ route('admin.horarios.index') }}"
-                                   @if (request()->routeIs('admin.horarios.*')) aria-current="page" @endif>
-                                    <i class="bi bi-clock" aria-hidden="true"></i> Horarios
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link @if (request()->routeIs('admin.reportes.*')) active @endif" href="{{ route('admin.reportes.index') }}"
-                                   @if (request()->routeIs('admin.reportes.*')) aria-current="page" @endif>
-                                    <i class="bi bi-bar-chart" aria-hidden="true"></i> Reportes
-                                </a>
-                            </li>
+                            @if (auth()->user()->isAdmin())
+                                <li class="nav-item">
+                                    <a class="nav-link @if (request()->routeIs('admin.usuarios.*')) active @endif" href="{{ route('admin.usuarios.index') }}"
+                                       @if (request()->routeIs('admin.usuarios.*')) aria-current="page" @endif>
+                                        <i class="bi bi-people" aria-hidden="true"></i> Usuarios
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link @if (request()->routeIs('admin.servicios.*')) active @endif" href="{{ route('admin.servicios.index') }}"
+                                       @if (request()->routeIs('admin.servicios.*')) aria-current="page" @endif>
+                                        <i class="bi bi-list-check" aria-hidden="true"></i> Gestionar servicios
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link @if (request()->routeIs('admin.horarios.*')) active @endif" href="{{ route('admin.horarios.index') }}"
+                                       @if (request()->routeIs('admin.horarios.*')) aria-current="page" @endif>
+                                        <i class="bi bi-clock" aria-hidden="true"></i> Horarios
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link @if (request()->routeIs('admin.reportes.*')) active @endif" href="{{ route('admin.reportes.index') }}"
+                                       @if (request()->routeIs('admin.reportes.*')) aria-current="page" @endif>
+                                        <i class="bi bi-bar-chart" aria-hidden="true"></i> Reportes
+                                    </a>
+                                </li>
+                            @endif
                         @else
                             <li class="nav-item">
                                 <a class="nav-link @if (request()->routeIs('citas.create')) active @endif" href="{{ route('citas.create') }}"
