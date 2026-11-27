@@ -3,17 +3,22 @@
 namespace App\Services;
 
 use App\Models\Appointment;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 /**
  * Consultas de los reportes del panel (requerimiento 9).
  *
- * Todas reciben un período [desde, hasta] con las dos fechas incluidas.
- * Ingresos = suma del total de las citas COMPLETADAS (lo que el salón cobró).
- * El ingreso por servicio usa el precio guardado en citasServicios al reservar;
- * si una fila antigua no lo tiene, toma el precio actual del servicio.
+ * Todas reciben un período [desde, hasta] con las dos fechas incluidas y, de
+ * forma opcional, el id de un servicio. Con servicio, solo cuentan las citas
+ * que lo incluyen y los ingresos son solo los de ese servicio.
+ *
+ * Ingresos = lo cobrado en las citas COMPLETADAS. Sin filtro de servicio es la
+ * suma del total de esas citas; por servicio se usa el precio guardado en
+ * citasServicios al reservar (si una fila antigua no lo tiene, el precio actual).
  *
  * Las usan Admin\ReporteController (pantalla, PDF y CSV) y sus pruebas.
  */
@@ -25,10 +30,10 @@ class Reportes
      *
      * @return Collection<int, Appointment>
      */
-    public function citas(Carbon $desde, Carbon $hasta, ?string $estado = null): Collection
+    public function citas(Carbon $desde, Carbon $hasta, ?string $estado = null, ?int $servicio = null): Collection
     {
-        return Appointment::with(['usuario', 'servicios'])
-            ->whereBetween('fecha', [$desde->toDateString(), $hasta->toDateString()])
+        return $this->citasDelPeriodo($desde, $hasta, $servicio)
+            ->with(['usuario', 'servicios'])
             ->when($estado, fn ($q) => $q->where('estado', $estado))
             ->orderBy('fecha')
             ->orderBy('hora')
@@ -40,10 +45,9 @@ class Reportes
      *
      * @return array{total: int, pendiente: int, confirmada: int, completada: int, cancelada: int, ingresos: float, ticketPromedio: float, clientes: int, tasaCancelacion: float}
      */
-    public function resumen(Carbon $desde, Carbon $hasta): array
+    public function resumen(Carbon $desde, Carbon $hasta, ?int $servicio = null): array
     {
-        $porEstado = Appointment::query()
-            ->whereBetween('fecha', [$desde->toDateString(), $hasta->toDateString()])
+        $porEstado = $this->citasDelPeriodo($desde, $hasta, $servicio)
             ->selectRaw('estado, COUNT(*) AS cantidad, COALESCE(SUM(total), 0) AS suma')
             ->groupBy('estado')
             ->get()
@@ -52,7 +56,9 @@ class Reportes
         $cantidad = fn (string $estado) => (int) ($porEstado[$estado]->cantidad ?? 0);
         $total = (int) $porEstado->sum('cantidad');
         $completadas = $cantidad(Appointment::COMPLETADA);
-        $ingresos = (float) ($porEstado[Appointment::COMPLETADA]->suma ?? 0);
+        $ingresos = $servicio
+            ? (float) $this->lineasCompletadas($desde, $hasta, $servicio)->sum(DB::raw('COALESCE(citasServicios.precio, servicios.precio)'))
+            : (float) ($porEstado[Appointment::COMPLETADA]->suma ?? 0);
 
         return [
             'total' => $total,
@@ -62,8 +68,7 @@ class Reportes
             'cancelada' => $cantidad(Appointment::CANCELADA),
             'ingresos' => round($ingresos, 2),
             'ticketPromedio' => $completadas > 0 ? round($ingresos / $completadas, 2) : 0.0,
-            'clientes' => (int) Appointment::query()
-                ->whereBetween('fecha', [$desde->toDateString(), $hasta->toDateString()])
+            'clientes' => (int) $this->citasDelPeriodo($desde, $hasta, $servicio)
                 ->where('estado', Appointment::COMPLETADA)
                 ->distinct()
                 ->count('usuarioId'),
@@ -73,16 +78,13 @@ class Reportes
 
     /**
      * Ingresos por servicio en las citas completadas del período, de mayor a menor.
+     * Con servicio, devuelve solo la fila de ese servicio.
      *
      * @return list<array{servicio: string, veces: int, ingresos: float, porcentaje: float}>
      */
-    public function ingresosPorServicio(Carbon $desde, Carbon $hasta): array
+    public function ingresosPorServicio(Carbon $desde, Carbon $hasta, ?int $servicio = null): array
     {
-        $filas = DB::table('citasServicios')
-            ->join('citas', 'citas.id', '=', 'citasServicios.citaId')
-            ->join('servicios', 'servicios.id', '=', 'citasServicios.servicioId')
-            ->whereBetween('citas.fecha', [$desde->toDateString(), $hasta->toDateString()])
-            ->where('citas.estado', Appointment::COMPLETADA)
+        $filas = $this->lineasCompletadas($desde, $hasta, $servicio)
             ->groupBy('servicios.id', 'servicios.nombre')
             ->selectRaw('servicios.nombre AS servicio, COUNT(*) AS veces, SUM(COALESCE(citasServicios.precio, servicios.precio)) AS ingresos')
             ->orderByDesc('ingresos')
@@ -105,14 +107,22 @@ class Reportes
      *
      * @return list<array{fecha: string, pendiente: int, confirmada: int, completada: int, cancelada: int, ingresos: float}>
      */
-    public function porDia(Carbon $desde, Carbon $hasta): array
+    public function porDia(Carbon $desde, Carbon $hasta, ?int $servicio = null): array
     {
-        $datos = Appointment::query()
-            ->whereBetween('fecha', [$desde->toDateString(), $hasta->toDateString()])
+        $datos = $this->citasDelPeriodo($desde, $hasta, $servicio)
             ->selectRaw('fecha, estado, COUNT(*) AS cantidad, COALESCE(SUM(total), 0) AS suma')
             ->groupBy('fecha', 'estado')
             ->get()
             ->groupBy(fn (Appointment $fila) => $fila->fecha->toDateString());
+
+        // Con servicio, el ingreso del día es solo el de ese servicio.
+        $ingresosServicio = $servicio
+            ? $this->lineasCompletadas($desde, $hasta, $servicio)
+                ->groupBy('citas.fecha')
+                ->selectRaw('citas.fecha AS fecha, SUM(COALESCE(citasServicios.precio, servicios.precio)) AS ingresos')
+                ->pluck('ingresos', 'fecha')
+                ->mapWithKeys(fn ($valor, $fecha) => [Carbon::parse($fecha)->toDateString() => (float) $valor])
+            : null;
 
         $dias = [];
         for ($dia = $desde->copy(); $dia->lte($hasta); $dia->addDay()) {
@@ -122,11 +132,39 @@ class Reportes
             foreach (Appointment::ESTADOS as $estado) {
                 $fila[$estado] = (int) ($filas[$estado]->cantidad ?? 0);
             }
-            $fila['ingresos'] = round((float) ($filas[Appointment::COMPLETADA]->suma ?? 0), 2);
+            $fila['ingresos'] = round($ingresosServicio
+                ? (float) $ingresosServicio->get($dia->toDateString(), 0)
+                : (float) ($filas[Appointment::COMPLETADA]->suma ?? 0), 2);
 
             $dias[] = $fila;
         }
 
         return $dias;
+    }
+
+    /**
+     * Citas del período; con servicio, solo las que lo incluyen.
+     *
+     * @return Builder<Appointment>
+     */
+    private function citasDelPeriodo(Carbon $desde, Carbon $hasta, ?int $servicio): Builder
+    {
+        return Appointment::query()
+            ->whereBetween('fecha', [$desde->toDateString(), $hasta->toDateString()])
+            ->when($servicio, fn ($q) => $q->whereHas('servicios', fn ($s) => $s->whereKey($servicio)));
+    }
+
+    /**
+     * Una fila por servicio realizado en las citas completadas del período
+     * (citasServicios unida a citas y servicios); con servicio, solo ese.
+     */
+    private function lineasCompletadas(Carbon $desde, Carbon $hasta, ?int $servicio): QueryBuilder
+    {
+        return DB::table('citasServicios')
+            ->join('citas', 'citas.id', '=', 'citasServicios.citaId')
+            ->join('servicios', 'servicios.id', '=', 'citasServicios.servicioId')
+            ->whereBetween('citas.fecha', [$desde->toDateString(), $hasta->toDateString()])
+            ->where('citas.estado', Appointment::COMPLETADA)
+            ->when($servicio, fn ($q) => $q->where('servicios.id', $servicio));
     }
 }

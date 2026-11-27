@@ -1,7 +1,7 @@
 # Checklist · Entrega Final (Semana 16)
 
 Requisitos adicionales de la Entrega Final contra el enunciado (`Proyecto_Final.docx`). Cada casilla se comprobó en el
-código, con una prueba automática o en la aplicación corriendo. Estado: **`php artisan test` → 132 pruebas en verde**
+código, con una prueba automática o en la aplicación corriendo. Estado: **`php artisan test` → 144 pruebas en verde**
 sobre MariaDB.
 
 Leyenda: `[x]` verificado · `[ ]` pendiente.
@@ -36,12 +36,16 @@ Leyenda: `[x]` verificado · `[ ]` pendiente.
 - [x] **Dashboard con estadísticas**: citas del día, ingresos de hoy (y esperados), ingresos del mes, clientes y nuevos del mes,
   pendientes de confirmar y lista de citas de hoy.
   Evidencia: `AdminController@index`, `resources/views/admin/index.blade.php`; `AdminCitasTest::test_el_dashboard_muestra…`; captura `05-panel-admin.png`.
-- [x] **Gestión completa de usuarios**: activar/desactivar (bloquea login web y API, borra tokens, cierra la sesión abierta) y cambiar el rol.
-  Evidencia: `Admin\UsuarioController`, `EnsureUserIsActive`; `AdminUsuariosTest`; captura `16-usuarios.png`.
+- [x] **Gestión completa de usuarios**: activar/desactivar (bloquea login web y API, borra tokens, cierra la sesión abierta) y
+  asignar uno de los tres roles: **administrador, empleado o cliente**. El empleado ve el panel, la agenda y las citas (y cambia
+  su estado), pero no usuarios, servicios, horarios ni reportes.
+  Evidencia: `Admin\UsuarioController@cambiarRol`, `User::ROLES`, `PersonalMiddleware`, migración `2026_11_27_000001_add_empleado_to_usuarios_table`;
+  `AdminUsuariosTest::test_asigna_los_tres_roles`, `EmpleadoTest`; captura `16-usuarios.png`.
 - [x] **Vista de agenda del día y de la semana**, con navegación y cambio de estado en línea.
   Evidencia: `Admin\CitaController@agenda`, `resources/views/admin/citas/agenda.blade.php`; `test_la_agenda_del_dia_y_de_la_semana`; captura `14-agenda-semana.png`.
-- [x] **Búsqueda y filtros en citas** (cliente, estado, rango de fechas) **y usuarios** (texto, rol, estado).
-  Evidencia: `/admin/citas`, `/admin/usuarios`; `test_busca_y_filtra_citas`, `test_busca_y_filtra_usuarios`; captura `15-citas-filtros.png`.
+- [x] **Búsqueda y filtros en citas** (cliente, servicio, estado, rango de fechas) **y usuarios** (texto, rol, estado).
+  Evidencia: `/admin/citas`, `/admin/usuarios`; `test_busca_y_filtra_citas`, `test_filtra_citas_por_servicio`, `test_busca_y_filtra_usuarios`,
+  `test_filtra_por_rol_empleado`; captura `15-citas-filtros.png`.
 - [x] **Gestión de disponibilidad horaria** desde el panel: horario semanal y fechas bloqueadas.
   Evidencia: `Admin\HorarioController`; `HorariosTest`; captura `17-horarios.png`.
 
@@ -52,17 +56,22 @@ Leyenda: `[x]` verificado · `[ ]` pendiente.
   Evidencia: `app/Http/Resources`, `bootstrap/app.php`; `ApiTest` (`assertJsonStructure`, `assertJsonPath`).
 - [x] **Autenticación API con Laravel Sanctum** (token Bearer, expira en 24 h, logout revoca).
   Evidencia: `Api\AuthController`, `config/sanctum.php`; `test_login_devuelve_un_token…`, `test_logout_revoca_el_token`, `test_sin_token_responde_401_en_json`.
-- [x] **Endpoints documentados**: `GET /api/servicios`, `GET /api/citas/usuario/{id}`, `POST /api/citas`, `PUT /api/citas/{id}`
-  (más login, logout, usuario, disponibilidad, detalle y cancelar). Evidencia: [docs/api.md](api.md); una prueba por endpoint en `ApiTest`.
+- [x] **Endpoints documentados con Swagger**: documentación OpenAPI 3 interactiva en `/api/documentacion` (Swagger UI) con
+  `GET /api/servicios`, `GET /api/citas/usuario/{id}`, `POST /api/citas`, `PUT /api/citas/{id}` y los demás (login, logout, usuario,
+  disponibilidad, detalle y cancelar), con esquemas, ejemplos, códigos de respuesta y botón **Authorize** para el token.
+  Evidencia: `public/api-docs/openapi.yaml`, `resources/views/api/documentacion.blade.php`, [docs/api.md](api.md);
+  `DocumentacionApiTest` (verifica que todas las rutas de `routes/api.php` estén documentadas); una prueba por endpoint en `ApiTest`.
 
 ## 9. Reportes y exportación · 20 puntos
 
 - [x] **Reporte de citas por período**: rango libre (con atajos: este mes, mes anterior, últimos 30 días, este año), resumen por
   estado, tasa de cancelación y tabla filtrable por estado.
   Evidencia: `/admin/reportes`, `App\Services\Reportes::citas/resumen`; `ReportesTest::test_el_reporte_muestra…`, `test_filtra_la_tabla_de_citas_por_estado`; captura `18-reportes.png`.
-- [x] **Reporte de ingresos por servicio y por período**: ingresos de las citas completadas por servicio (veces, ingresos y %) y por día.
+- [x] **Reporte de ingresos por servicio y por período**: ingresos de las citas completadas por servicio (veces, ingresos y %) y por día,
+  con filtro por **período y servicio** (el filtro se conserva en el PDF y el CSV).
   El precio se guarda en `citasServicios` al reservar, así que editar un servicio no cambia los reportes pasados.
-  Evidencia: `Reportes::ingresosPorServicio/porDia`, migración `2026_11_26_000001_add_precio_to_citas_servicios_table`; `ReportesTest`.
+  Evidencia: `Reportes::ingresosPorServicio/porDia`, migración `2026_11_26_000001_add_precio_to_citas_servicios_table`;
+  `ReportesTest`, `test_filtra_los_reportes_por_servicio`.
 - [x] **Exportación a PDF** de los dos reportes (citas en A4 horizontal; ingresos con barras proporcionales), con dompdf.
   Evidencia: `resources/views/admin/reportes/pdf`, `ReporteController@citasPdf/ingresosPdf`; `test_exporta_las_citas_a_pdf`, `test_exporta_los_ingresos_a_pdf`.
 - [x] **Exportación a Excel/CSV** de citas e ingresos: UTF-8 con BOM, separador `;` y coma decimal (Excel en español), con

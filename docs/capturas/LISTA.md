@@ -19,14 +19,23 @@ Las usa `docs/manual/manual-usuario.html`. Todas se generaron con Chrome headles
 | `13-mis-citas.png` | `/citas` | cliente | 1280 × 800 | Tarjetas de las próximas citas con estado, servicios, total y botones Modificar/Cancelar |
 | `14-agenda-semana.png` | `/admin/agenda?vista=semana` | admin | 1280 × 800 | Agenda de lunes a domingo con las citas de cada día y su estado |
 | `15-citas-filtros.png` | `/admin/citas?estado=pendiente` | admin | 1280 × 800 | Filtros de cliente, estado y fechas, y tabla de citas pendientes con el selector de estado |
-| `16-usuarios.png` | `/admin/usuarios` | admin | 1280 × 800 | Búsqueda, filtros de rol y estado, y botones Desactivar/Activar y Hacer admin |
+| `16-usuarios.png` | `/admin/usuarios?q=appsalon.com` | admin | 1280 × 800 | Las tres cuentas de prueba (administrador, cliente y empleado), filtros de rol y estado, botones Desactivar y selector de rol con Asignar |
 | `17-horarios.png` | `/admin/horarios` | admin | 1280 × 800 | Horario semanal editable y fechas bloqueadas |
 | `18-reportes.png` | `/admin/reportes` | admin | 1280 × 800 | Filtros del período, rangos rápidos, tarjetas de resumen y gráficas de citas e ingresos por día |
 | `19-movil-calendario.png` | `/citas/nueva?servicio=1` | cliente | 360 × 780 | Calendario y horas libres en el celular |
 | `20-olvide-contrasena.png` | `/olvide-contrasena` | invitado | 1280 × 800 | Formulario para pedir el enlace de recuperación de contraseña |
+| `21-swagger.png` | `/api/documentacion` | invitado | 1280 × 800 | Swagger UI con las instrucciones de uso y los endpoints agrupados en Autenticación, Servicios y Citas |
+| `22-swagger-citas.png` | `/api/documentacion` + desplegar `POST /citas` | invitado | 1280 × 800 | Operación "Reservar una cita" abierta, con el cuerpo de ejemplo y el botón Execute |
+| `23-panel-empleado.png` | `/admin` | empleado | 1280 × 800 | "Panel del salón" con el menú reducido (Panel, Agenda, Citas) y el botón Ver citas |
+| `24-reportes-servicio.png` | `/admin/reportes?servicio=1` | admin | 1280 × 800 | Reportes filtrados por "Corte de cabello mujer": filtro de servicio, resumen y gráficas |
+| `25-citas-servicio.png` | `/admin/citas?servicio=1` | admin | 1280 × 800 | Búsqueda de citas con el filtro de servicio aplicado |
 
 Las capturas 12 a 20 (Entrega Final) se tomaron con Chromium (Playwright) sobre la base recién sembrada el 21/11/2026,
 por eso las fechas y los números cambian si se vuelven a generar otro día.
+
+Las capturas 16 y 21 a 25 (rúbrica de la Entrega Final: roles, empleado, filtro por servicio y Swagger) las genera
+`docs/capturas/herramienta/capturas-rubrica.mjs` y las usa el instructivo de evaluación
+(`docs/Instructivo-Evaluacion-Entrega-Final-AppSalon.docx`).
 
 ## Generarlas otra vez
 
@@ -34,6 +43,7 @@ por eso las fechas y los números cambian si se vuelven a generar otro día.
 php artisan migrate:fresh --seed
 php artisan serve
 node docs/capturas/herramienta/capturas.mjs
+node docs/capturas/herramienta/capturas-rubrica.mjs
 ```
 
 El script (`docs/capturas/herramienta/capturas.mjs`) inicia sesión con las cuentas de prueba de

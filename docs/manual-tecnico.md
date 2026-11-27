@@ -104,7 +104,8 @@ erDiagram
         varchar(30) email UK
         varchar(60) password "bcrypt"
         varchar(10) telefono "nullable"
-        tinyint admin "0 cliente, 1 admin"
+        tinyint admin "1 administrador"
+        tinyint empleado "1 empleado (Entrega Final)"
         tinyint confirmado
         tinyint activo "Entrega Final"
         varchar(15) token "confirmación, nullable"
@@ -234,11 +235,11 @@ cita igual se guarda y el error se registra en el log.
 |---|---|---|
 | Dashboard | `/admin` | Citas de hoy, ingresos de hoy (completadas) y esperados, ingresos del mes, clientes y nuevos del mes, citas pendientes de confirmar, lista de citas de hoy |
 | Agenda | `/admin/agenda?vista=dia\|semana&fecha=AAAA-MM-DD` | Citas del día o de la semana (lunes a domingo), navegación anterior/hoy/siguiente, cambio de estado en línea |
-| Citas | `/admin/citas?q=&estado=&desde=&hasta=` | Búsqueda por cliente (nombre, apellido, nombre completo o correo), filtros por estado y rango de fechas, paginado de 15 |
-| Usuarios | `/admin/usuarios?q=&rol=&estado=` | Búsqueda por nombre, correo o teléfono; filtros por rol (cliente/admin) y estado (activo/inactivo/sin confirmar); activar o desactivar y cambiar el rol |
+| Citas | `/admin/citas?q=&servicio=&estado=&desde=&hasta=` | Búsqueda por cliente (nombre, apellido, nombre completo o correo), filtros por servicio, estado y rango de fechas, paginado de 15 |
+| Usuarios | `/admin/usuarios?q=&rol=&estado=` | Búsqueda por nombre, correo o teléfono; filtros por rol (cliente/empleado/admin) y estado (activo/inactivo/sin confirmar); activar o desactivar y asignar el rol |
 | Servicios | `/admin/servicios` | CRUD de la Entrega Intermedia |
 | Horarios | `/admin/horarios` | Horario de cada día de la semana y fechas bloqueadas |
-| Reportes | `/admin/reportes?desde=&hasta=&estado=` | Resumen del período, gráficas de citas por día (por estado), ingresos por día e ingresos por servicio; tabla de citas; exportación a PDF y CSV |
+| Reportes | `/admin/reportes?desde=&hasta=&servicio=&estado=` | Resumen del período, gráficas de citas por día (por estado), ingresos por día e ingresos por servicio; tabla de citas; exportación a PDF y CSV |
 
 ### Reportes y exportación
 
@@ -267,6 +268,10 @@ cita igual se guarda y el error se registra en el log.
 `/olvide-contrasena` envía `App\Mail\RestablecerContrasena` (vía `User::sendPasswordResetNotification`) y
 `/restablecer-contrasena/{token}` cambia la contraseña. El enlace vence a los 60 minutos y sirve una vez; la respuesta es la
 misma exista o no el correo. Al restablecer, la cuenta queda confirmada y se revocan sus tokens de la API.
+
+Roles: el rol sale de las columnas `admin` y `empleado` (`User::rol()`, `User::asignarRol()`). Las rutas del panel,
+la agenda y las citas usan el middleware `personal` (administrador o empleado); usuarios, servicios, horarios y
+reportes usan además `admin`. Al iniciar sesión, el personal va a `/admin` y el cliente al catálogo.
 
 Protecciones: un administrador no puede desactivarse ni quitarse el rol a sí mismo. Desactivar una
 cuenta borra sus tokens de la API, y si tenía la sesión abierta, el middleware `activo` la cierra en su
@@ -297,7 +302,7 @@ regeneradas, middleware `admin`, throttle, Eloquent con prepared statements; ver
 php artisan test
 ```
 
-**132 pruebas** (72 de la Entrega Intermedia + 60 nuevas) contra la base `appsalon_mvc_php_test`. Las
+**144 pruebas** (72 de la Entrega Intermedia + 72 nuevas) contra la base `appsalon_mvc_php_test`. Las
 nuevas fijan "hoy" en el lunes 7 de diciembre de 2026 (`tests/Concerns/PreparaAgenda.php`) para que el
 resultado no dependa del día en que se corren.
 
@@ -305,10 +310,12 @@ resultado no dependa del día en que se corren.
 |---|---|
 | `CitaReservaTest` | Calendario, reserva con varios servicios, total y duración, sobreposición (incluido el caso de citas contiguas), horario, domingo cerrado, fecha bloqueada, anticipación, servicios inválidos, disponibilidad JSON, modificar, cancelar, permisos y correos |
 | `AdminCitasTest` | Dashboard (citas de hoy, ingresos, clientes), agenda de día y semana, búsqueda y filtros, cambio de estado con correo y transiciones no permitidas |
-| `AdminUsuariosTest` | Búsqueda y filtros, activar/desactivar (login bloqueado, tokens borrados, sesión cerrada), cambio de rol y protección del propio admin |
+| `AdminUsuariosTest` | Búsqueda y filtros, activar/desactivar (login bloqueado, tokens borrados, sesión cerrada), asignación de los tres roles y protección del propio admin |
+| `EmpleadoTest` | El empleado entra al panel, la agenda y las citas y cambia estados; recibe 403 en usuarios, servicios, horarios y reportes; su menú y su redirección al iniciar sesión |
 | `HorariosTest` | Edición del horario semanal y su efecto en la disponibilidad, validación apertura/cierre, bloqueos |
 | `ReportesTest` | Permisos, resumen e ingresos por servicio (con el precio guardado al reservar), período por defecto y validación, filtro por estado, PDF de citas e ingresos, CSV para Excel y protección contra fórmulas |
 | `RecuperarContrasenaTest` | Envío del enlace, no revelar si el correo existe, restablecer (confirma la cuenta y revoca tokens), enlace vencido o inventado, validación y contenido del correo |
+| `DocumentacionApiTest` | La página Swagger carga y la especificación OpenAPI documenta todas las rutas y métodos de `routes/api.php` |
 | `ApiTest` | Login y token, 401/403/404/405/409/422 en JSON, los endpoints de servicios y citas, permisos por usuario, logout y cuentas desactivadas |
 
 ## 7. Despliegue

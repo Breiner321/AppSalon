@@ -1,5 +1,5 @@
 {{-- Reporte de citas por período en PDF (Admin\ReporteController@citasPdf).
-     Recibe $desde, $hasta, $estado, $resumen y $citas. --}}
+     Recibe $desde, $hasta, $estado, $servicio (filtro opcional), $resumen y $citas. --}}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -15,6 +15,7 @@
     <p class="suave">
         Período: {{ $desde->format('d/m/Y') }} al {{ $hasta->format('d/m/Y') }}
         @if ($estado) · Solo citas {{ $estado }}s @endif
+        @if ($servicio) · Servicio: {{ $servicio->nombre }} @endif
     </p>
 
     <table class="resumen">

@@ -46,7 +46,7 @@ class AppointmentSeeder extends Seeder
         }
 
         // Citas generadas.
-        $clientes = User::where('admin', false)->where('confirmado', true)->get();
+        $clientes = User::clientes()->where('confirmado', true)->get();
 
         for ($fecha = today()->subWeeks(6); $fecha->lte(today()->addWeeks(3)); $fecha = $fecha->copy()->addDay()) {
             if (! $disponibilidad->horarioDe($fecha)) {

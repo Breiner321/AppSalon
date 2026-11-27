@@ -25,6 +25,7 @@ class UsuarioResource extends JsonResource
             'email' => $this->email,
             'telefono' => $this->telefono,
             'admin' => $this->isAdmin(),
+            'rol' => $this->rol(),
         ];
     }
 }

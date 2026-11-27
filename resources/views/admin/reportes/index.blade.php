@@ -1,12 +1,12 @@
 {{-- Reportes del panel (requerimiento 9): resumen, gráficas, tablas y exportación.
-     Recibe $desde, $hasta, $estado, $resumen, $porServicio, $porDia y $citas desde Admin\ReporteController@index.
+     Recibe $desde, $hasta, $estado, $servicio, $servicios, $resumen, $porServicio, $porDia y $citas desde Admin\ReporteController@index.
      Las gráficas usan Chart.js; cada una tiene su tabla de datos para quien no pueda verla. --}}
 @extends('layouts.app')
 
 @section('title', 'Reportes')
 
 @php
-    $filtros = ['desde' => $desde->toDateString(), 'hasta' => $hasta->toDateString()];
+    $filtros = array_filter(['desde' => $desde->toDateString(), 'hasta' => $hasta->toDateString(), 'servicio' => $servicio?->id]);
     $rangos = [
         'Este mes' => [today()->startOfMonth(), today()->endOfMonth()],
         'Mes anterior' => [today()->subMonthNoOverflow()->startOfMonth(), today()->subMonthNoOverflow()->endOfMonth()],
@@ -30,21 +30,32 @@
         <h1 class="mb-1">Reportes</h1>
         <p class="text-body-secondary mb-0" data-test="periodo">
             Del {{ $desde->translatedFormat('j \d\e F \d\e Y') }} al {{ $hasta->translatedFormat('j \d\e F \d\e Y') }}.
+            @if ($servicio) Solo citas con <strong data-test="servicio-filtrado">{{ $servicio->nombre }}</strong>. @endif
             Los ingresos cuentan solo las citas completadas.
         </p>
     </div>
 
     <form method="GET" action="{{ route('admin.reportes.index') }}" class="filtros p-3 mb-2">
         <div class="row g-2 align-items-end">
-            <div class="col-6 col-md-3">
+            <div class="col-6 col-md-2">
                 <label for="desde" class="form-label small mb-1">Desde</label>
                 <input type="date" name="desde" id="desde" class="form-control @error('desde') is-invalid @enderror" value="{{ $desde->toDateString() }}">
                 <x-form-error field="desde" />
             </div>
-            <div class="col-6 col-md-3">
+            <div class="col-6 col-md-2">
                 <label for="hasta" class="form-label small mb-1">Hasta</label>
                 <input type="date" name="hasta" id="hasta" class="form-control @error('hasta') is-invalid @enderror" value="{{ $hasta->toDateString() }}">
                 <x-form-error field="hasta" />
+            </div>
+            <div class="col-12 col-md-3">
+                <label for="servicio" class="form-label small mb-1">Servicio</label>
+                <select name="servicio" id="servicio" class="form-select @error('servicio') is-invalid @enderror">
+                    <option value="">Todos los servicios</option>
+                    @foreach ($servicios as $s)
+                        <option value="{{ $s->id }}" @selected($servicio?->id === $s->id)>{{ $s->nombre }}</option>
+                    @endforeach
+                </select>
+                <x-form-error field="servicio" />
             </div>
             <div class="col-12 col-md-3">
                 <label for="estado" class="form-label small mb-1">Estado (tabla de citas)</label>
@@ -55,7 +66,7 @@
                     @endforeach
                 </select>
             </div>
-            <div class="col-12 col-md-3">
+            <div class="col-12 col-md-2">
                 <button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel" aria-hidden="true"></i> Ver reporte</button>
             </div>
         </div>
@@ -63,7 +74,7 @@
     <p class="small mb-4">
         Rangos rápidos:
         @foreach ($rangos as $nombre => [$d, $h])
-            <a href="{{ route('admin.reportes.index', ['desde' => $d->toDateString(), 'hasta' => $h->toDateString()]) }}"
+            <a href="{{ route('admin.reportes.index', array_filter(['desde' => $d->toDateString(), 'hasta' => $h->toDateString(), 'servicio' => $servicio?->id])) }}"
                class="me-2">{{ $nombre }}</a>
         @endforeach
     </p>

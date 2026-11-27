@@ -95,6 +95,7 @@ que crea la base `appsalon_mvc_php` con todas las tablas y los mismos datos de p
 | Rol | Correo | Contraseña |
 |---|---|---|
 | Administrador | `admin@appsalon.com` | `Admin123` |
+| Empleado | `empleado@appsalon.com` | `Empleado123` |
 | Cliente | `cliente@appsalon.com` | `Cliente123` |
 | Otros clientes | `camila.rodriguez@correo.com`, `andres.martinez@correo.com`, … | `Cliente123` |
 
@@ -103,7 +104,8 @@ Las crea `database/seeders/UserSeeder.php` y también vienen en el script SQL. E
 esos casos). Los datos de prueba incluyen el horario del salón, una fecha bloqueada y unas 150 citas de las
 últimas seis semanas y las próximas tres.
 
-**API:** `POST /api/login` con cualquiera de estas cuentas devuelve el token (ver [docs/api.md](docs/api.md)).
+**API:** `POST /api/login` con cualquiera de estas cuentas devuelve el token. Se puede probar desde la
+documentación Swagger en **http://127.0.0.1:8000/api/documentacion** (ver [docs/api.md](docs/api.md)).
 También puedes registrar clientes nuevos en `/registro` (ver [10. Confirmación de cuenta](#10-confirmación-de-cuenta)).
 
 ## 6. Funcionalidades por rol
@@ -133,18 +135,27 @@ También puedes registrar clientes nuevos en `/registro` (ver [10. Confirmación
   lista de citas del día. Después del login va aquí.
 - **Agenda** (`/admin/agenda`): vista de día o de semana, con navegación y cambio de estado de cada cita
   (confirmar, completar, cancelar). Confirmar o cancelar le avisa al cliente por correo.
-- **Citas** (`/admin/citas`): búsqueda por cliente y filtros por estado y rango de fechas.
+- **Citas** (`/admin/citas`): búsqueda por cliente y filtros por servicio, estado y rango de fechas.
 - **Usuarios** (`/admin/usuarios`): búsqueda por nombre, correo o teléfono, filtros por rol y estado,
-  **activar o desactivar** cuentas y **cambiar el rol**. Una cuenta desactivada no puede entrar ni usar la API.
+  **activar o desactivar** cuentas y **asignar el rol** (cliente, empleado o administrador). Una cuenta
+  desactivada no puede entrar ni usar la API.
 - **CRUD de servicios** (`/admin/servicios`): listado paginado de 10 en 10, crear, editar, activar o desactivar
   (el servicio inactivo no sale en el catálogo) y eliminar con una ventana de confirmación.
 - **Horarios** (`/admin/horarios`): horario de apertura y cierre de cada día y **fechas bloqueadas** (festivos, vacaciones).
 - **Reportes** (`/admin/reportes`): citas por período (por estado y por día) e **ingresos por servicio y por día**, con
-  **gráficas** (Chart.js), y exportación de cada reporte a **PDF** y a **Excel (CSV)**.
+  **gráficas** (Chart.js), filtro por **período y servicio**, y exportación de cada reporte a **PDF** y a **Excel (CSV)**.
+
+### Empleado
+- Después del login va al **panel del salón** (`/admin`), con las mismas estadísticas del día.
+- **Agenda** y **Citas**: ve las citas de todos los clientes, las busca y filtra, y las confirma, completa o cancela.
+- No entra a usuarios, servicios, horarios ni reportes (recibe **403**), y esas opciones no salen en su menú.
 
 ### API REST
 - Login con token de **Laravel Sanctum**, `GET /api/servicios`, `GET /api/citas/usuario/{id}`, `POST /api/citas`,
-  `PUT /api/citas/{id}`, cancelar y disponibilidad. Documentación con ejemplos en **[docs/api.md](docs/api.md)**.
+  `PUT /api/citas/{id}`, cancelar y disponibilidad.
+- Documentación **Swagger (OpenAPI 3)** interactiva en **`/api/documentacion`**: se puede iniciar sesión, autorizar el
+  token y probar cada endpoint desde el navegador. La especificación está en
+  [`public/api-docs/openapi.yaml`](public/api-docs/openapi.yaml) y los ejemplos en **[docs/api.md](docs/api.md)**.
 
 ### Reglas de la agenda
 - El salón atiende **una cita a la vez**: no se permiten citas que se sobrepongan (las canceladas no cuentan).
@@ -163,7 +174,7 @@ app/
 ├── Http/Controllers/   AuthController, PasswordResetController, ServiceController, AppointmentController, AdminController
 │   ├── Admin/          CitaController (agenda, filtros, estados), UsuarioController, HorarioController, ReporteController
 │   └── Api/            AuthController (token), ServicioController, CitaController
-├── Http/Middleware/    AdminMiddleware ('admin'), EnsureUserIsActive ('activo'), JsonSinEscaparUnicode
+├── Http/Middleware/    AdminMiddleware ('admin'), PersonalMiddleware ('personal': admin o empleado), EnsureUserIsActive ('activo'), JsonSinEscaparUnicode
 ├── Http/Requests/      RegisterRequest, LoginRequest, ServiceRequest, AppointmentRequest
 ├── Http/Resources/     ServicioResource, CitaResource, UsuarioResource (JSON de la API)
 ├── Mail/               ConfirmarCuenta, CitaNotificacion, RestablecerContrasena
@@ -181,6 +192,7 @@ database/
 docs/                   documentación (manual PDF, seguridad, checklist, revisiones, capturas)
 lang/es/                validación, autenticación, contraseñas y paginación en español
 public/css/app.css      estilos propios sobre Bootstrap
+public/api-docs/        openapi.yaml (especificación Swagger de la API)
 resources/views/
 ├── layouts/            layout principal con la navegación por rol
 ├── components/         <x-alert />, <x-form-error />
@@ -188,6 +200,7 @@ resources/views/
 ├── services/           catálogo público
 ├── appointments/       reservar/modificar (calendario) y mis citas
 ├── admin/              dashboard, agenda, citas, usuarios, horarios, reportes (y sus PDF) y CRUD de servicios
+├── api/                documentación Swagger UI de la API
 ├── emails/             confirmación de cuenta y avisos de cita
 └── errors/             403, 404, 419, 429, 500, 4xx y 5xx
 routes/web.php          rutas web (los nombres de ruta son el contrato del equipo)
@@ -200,7 +213,7 @@ tests/Feature/          pruebas de autenticación, seguridad, servicios, interfa
 
 | Tabla | Campos principales |
 |---|---|
-| `usuarios` | id, nombre, apellido, email (único), password, telefono, admin, confirmado, token |
+| `usuarios` | id, nombre, apellido, email (único), password, telefono, admin, empleado, confirmado, token |
 | `servicios` | id, nombre, precio, descripcion, duracion, activo |
 | `citas` | id, fecha, hora, duracion, usuarioId → usuarios, total, estado |
 | `citasServicios` | id, citaId → citas, servicioId → servicios, precio (al reservar) |
@@ -208,7 +221,8 @@ tests/Feature/          pruebas de autenticación, seguridad, servicios, interfa
 | `bloqueos` | id, fecha (única), motivo |
 | `personal_access_tokens` | tokens de la API (Sanctum) |
 
-`usuarios` tiene además la columna `activo`. El diagrama entidad-relación está en el
+`usuarios` tiene además la columna `activo`. El rol sale de `admin` y `empleado`: `admin = 1` es administrador,
+`empleado = 1` es empleado y las dos en 0 es cliente. El diagrama entidad-relación está en el
 [manual técnico](docs/manual-tecnico.md#2-diagrama-de-base-de-datos).
 
 Si se borra un usuario, sus citas quedan con `usuarioId` en NULL. Si se borra una cita o un servicio, sus filas
@@ -221,7 +235,8 @@ de `citasServicios` se borran en cascada.
 - **XSS:** todas las vistas imprimen con `{{ }}`.
 - **CSRF:** todos los formularios llevan `@csrf`. Sin token, la respuesta es 419.
 - **Sesiones:** se regeneran al entrar y se invalidan al salir. Cookie `http_only`, `same_site=lax`, 120 minutos.
-- **Permisos:** el middleware `admin` protege `/admin` y todo el CRUD de servicios. Un cliente recibe 403.
+- **Permisos:** el middleware `personal` deja al administrador y al empleado ver el panel, la agenda y las citas;
+  el middleware `admin` protege usuarios, servicios, horarios y reportes. Un cliente recibe 403 en todo `/admin`.
 - **Límite de intentos:** 5 por minuto en el login y en el registro. Al sexto se responde 429.
 - **Consultas** con Eloquent (prepared statements), sin SQL concatenado.
 - **Citas:** solo el dueño o un admin pueden verlas o cambiarlas (`AppointmentPolicy`). La disponibilidad se revisa
@@ -242,10 +257,11 @@ C:\xampp\mysql\bin\mysql.exe -u root -e "CREATE DATABASE appsalon_mvc_php_test C
 php artisan test
 ```
 
-Resultado esperado: **132 pruebas en verde**. Cubren registro, login y logout, confirmación por token, permisos,
+Resultado esperado: **144 pruebas en verde**. Cubren registro, login y logout, confirmación por token, permisos,
 CSRF, throttle, XSS, integridad referencial, CRUD de servicios, catálogo, navegación, interfaz e idioma, y en la
 Entrega Final la reserva de citas (sobreposición, horario, bloqueos, modificar, cancelar, correos), el panel
-(dashboard, agenda, filtros, usuarios, horarios), la API, los reportes con su exportación y la recuperación de contraseña.
+(dashboard, agenda, filtros, usuarios, roles, horarios), el rol empleado, la API y su documentación Swagger, los
+reportes con su filtro por servicio y su exportación, y la recuperación de contraseña.
 
 ## 10. Confirmación de cuenta
 
@@ -281,7 +297,8 @@ Otra documentación:
 | Documento | Contenido |
 |---|---|
 | **[docs/manual-tecnico.md](docs/manual-tecnico.md)** | **Manual técnico: arquitectura, diagrama de base de datos, reglas de la agenda, seguridad y pruebas** |
-| **[docs/api.md](docs/api.md)** | **Documentación de la API REST con ejemplos** |
+| **[docs/Instructivo-Evaluacion-Entrega-Final-AppSalon.docx](docs/Instructivo-Evaluacion-Entrega-Final-AppSalon.docx)** | **Instructivo para verificar cada punto de la rúbrica de la Entrega Final** |
+| **[docs/api.md](docs/api.md)** | **Documentación de la API REST con ejemplos** (Swagger en `/api/documentacion`) |
 | [docs/checklist-entrega-final.md](docs/checklist-entrega-final.md) | Requisitos de la Entrega Final con su evidencia |
 | [docs/checklist-entrega-intermedia.md](docs/checklist-entrega-intermedia.md) | Requisitos de la rúbrica con su evidencia |
 | [docs/seguridad.md](docs/seguridad.md) | Cada requisito de seguridad, cómo se cumple y qué prueba lo verifica |

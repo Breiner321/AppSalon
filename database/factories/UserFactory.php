@@ -33,6 +33,7 @@ class UserFactory extends Factory
             'password' => static::$password ??= Hash::make('password'),
             'telefono' => fake()->numerify('##########'),
             'admin' => false,
+            'empleado' => false,
             'confirmado' => true,
             'activo' => true,
             'token' => null,
@@ -46,6 +47,16 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'admin' => true,
+        ]);
+    }
+
+    /**
+     * Empleado del salón: ve el panel, la agenda y las citas.
+     */
+    public function empleado(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'empleado' => true,
         ]);
     }
 

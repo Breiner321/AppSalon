@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
+use App\Models\Service;
 use App\Services\Reportes;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -18,8 +19,9 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  * Reportes del panel (requerimiento 9): citas por período e ingresos por
  * servicio, con gráficas (Chart.js) y exportación a PDF (dompdf) y CSV para Excel.
  *
- * Todos los reportes usan los filtros desde, hasta (AAAA-MM-DD) y, en el de
- * citas, estado. Sin filtros se muestra el mes en curso.
+ * Todos los reportes usan los filtros desde, hasta (AAAA-MM-DD) y servicio
+ * (id, opcional) y, en el de citas, estado. Sin filtros se muestra el mes en
+ * curso con todos los servicios.
  */
 class ReporteController extends Controller
 {
@@ -38,16 +40,18 @@ class ReporteController extends Controller
      */
     public function index(Request $request): View
     {
-        [$desde, $hasta, $estado] = $this->periodo($request);
+        [$desde, $hasta, $estado, $servicio] = $this->periodo($request);
 
         return view('admin.reportes.index', [
             'desde' => $desde,
             'hasta' => $hasta,
             'estado' => $estado,
-            'resumen' => $this->reportes->resumen($desde, $hasta),
-            'porServicio' => $this->reportes->ingresosPorServicio($desde, $hasta),
-            'porDia' => $this->reportes->porDia($desde, $hasta),
-            'citas' => $this->reportes->citas($desde, $hasta, $estado),
+            'servicio' => $servicio,
+            'servicios' => Service::orderBy('nombre')->get(['id', 'nombre']),
+            'resumen' => $this->reportes->resumen($desde, $hasta, $servicio?->id),
+            'porServicio' => $this->reportes->ingresosPorServicio($desde, $hasta, $servicio?->id),
+            'porDia' => $this->reportes->porDia($desde, $hasta, $servicio?->id),
+            'citas' => $this->reportes->citas($desde, $hasta, $estado, $servicio?->id),
         ]);
     }
 
@@ -56,14 +60,15 @@ class ReporteController extends Controller
      */
     public function citasPdf(Request $request): Response
     {
-        [$desde, $hasta, $estado] = $this->periodo($request);
+        [$desde, $hasta, $estado, $servicio] = $this->periodo($request);
 
         return Pdf::loadView('admin.reportes.pdf.citas', [
             'desde' => $desde,
             'hasta' => $hasta,
             'estado' => $estado,
-            'resumen' => $this->reportes->resumen($desde, $hasta),
-            'citas' => $this->reportes->citas($desde, $hasta, $estado),
+            'servicio' => $servicio,
+            'resumen' => $this->reportes->resumen($desde, $hasta, $servicio?->id),
+            'citas' => $this->reportes->citas($desde, $hasta, $estado, $servicio?->id),
         ])->setPaper('a4', 'landscape')->download($this->nombreArchivo('citas', $desde, $hasta, 'pdf'));
     }
 
@@ -72,15 +77,16 @@ class ReporteController extends Controller
      */
     public function ingresosPdf(Request $request): Response
     {
-        [$desde, $hasta] = $this->periodo($request);
+        [$desde, $hasta, , $servicio] = $this->periodo($request);
 
         return Pdf::loadView('admin.reportes.pdf.ingresos', [
             'desde' => $desde,
             'hasta' => $hasta,
-            'resumen' => $this->reportes->resumen($desde, $hasta),
-            'porServicio' => $this->reportes->ingresosPorServicio($desde, $hasta),
+            'servicio' => $servicio,
+            'resumen' => $this->reportes->resumen($desde, $hasta, $servicio?->id),
+            'porServicio' => $this->reportes->ingresosPorServicio($desde, $hasta, $servicio?->id),
             'porDia' => array_values(array_filter(
-                $this->reportes->porDia($desde, $hasta),
+                $this->reportes->porDia($desde, $hasta, $servicio?->id),
                 fn (array $dia) => $dia['ingresos'] > 0
             )),
         ])->setPaper('a4')->download($this->nombreArchivo('ingresos', $desde, $hasta, 'pdf'));
@@ -91,8 +97,8 @@ class ReporteController extends Controller
      */
     public function citasCsv(Request $request): StreamedResponse
     {
-        [$desde, $hasta, $estado] = $this->periodo($request);
-        $citas = $this->reportes->citas($desde, $hasta, $estado);
+        [$desde, $hasta, $estado, $servicio] = $this->periodo($request);
+        $citas = $this->reportes->citas($desde, $hasta, $estado, $servicio?->id);
 
         $filas = $citas->map(fn (Appointment $c) => [
             $c->id,
@@ -120,8 +126,8 @@ class ReporteController extends Controller
      */
     public function ingresosCsv(Request $request): StreamedResponse
     {
-        [$desde, $hasta] = $this->periodo($request);
-        $servicios = $this->reportes->ingresosPorServicio($desde, $hasta);
+        [$desde, $hasta, , $servicio] = $this->periodo($request);
+        $servicios = $this->reportes->ingresosPorServicio($desde, $hasta, $servicio?->id);
 
         $filas = collect($servicios)->map(fn (array $s) => [
             $s['servicio'], $s['veces'], $this->numero($s['ingresos']), $this->numero($s['porcentaje'], 1),
@@ -136,10 +142,10 @@ class ReporteController extends Controller
     }
 
     /**
-     * Valida y devuelve el período [desde, hasta] y el estado opcional.
-     * Por defecto, el mes en curso.
+     * Valida y devuelve el período [desde, hasta], el estado opcional y el
+     * servicio opcional. Por defecto, el mes en curso y todos los servicios.
      *
-     * @return array{0: Carbon, 1: Carbon, 2: string|null}
+     * @return array{0: Carbon, 1: Carbon, 2: string|null, 3: Service|null}
      */
     private function periodo(Request $request): array
     {
@@ -147,7 +153,10 @@ class ReporteController extends Controller
             'desde' => ['nullable', 'date_format:Y-m-d'],
             'hasta' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:desde'],
             'estado' => ['nullable', Rule::in(Appointment::ESTADOS)],
+            'servicio' => ['nullable', 'integer', 'exists:servicios,id'],
         ], [
+            'servicio.integer' => 'El servicio elegido no es válido.',
+            'servicio.exists' => 'El servicio elegido no existe.',
             'desde.date_format' => 'La fecha "desde" debe tener el formato AAAA-MM-DD.',
             'hasta.date_format' => 'La fecha "hasta" debe tener el formato AAAA-MM-DD.',
             'hasta.after_or_equal' => 'La fecha "hasta" debe ser igual o posterior a la fecha "desde".',
@@ -167,7 +176,9 @@ class ReporteController extends Controller
             ]);
         }
 
-        return [$desde, $hasta, $datos['estado'] ?? null];
+        $servicio = isset($datos['servicio']) ? Service::find($datos['servicio']) : null;
+
+        return [$desde, $hasta, $datos['estado'] ?? null, $servicio];
     }
 
     /**

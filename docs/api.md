@@ -3,6 +3,10 @@
 API para consultar servicios y gestionar citas desde otra aplicación (por ejemplo, una app móvil o
 Postman). Usa las mismas reglas que la web: horario del salón, fechas bloqueadas y no sobreposición.
 
+- **Documentación Swagger (OpenAPI 3):** `http://127.0.0.1:8000/api/documentacion`. Muestra todos los endpoints con
+  sus parámetros, esquemas y códigos de respuesta, y permite probarlos: haz el login, pulsa **Authorize** y pega el
+  token. La especificación está en [`public/api-docs/openapi.yaml`](../public/api-docs/openapi.yaml) y la prueba
+  `tests/Feature/DocumentacionApiTest.php` verifica que incluya todas las rutas de `routes/api.php`.
 - **URL base:** `http://127.0.0.1:8000/api`
 - **Formato:** JSON en UTF-8. Envía `Content-Type: application/json` en los POST y PUT, y
   `Accept: application/json` en todas las peticiones (las rutas `/api/*` responden JSON aunque falte).
@@ -112,7 +116,8 @@ Respuesta **200**:
       "apellido": "Gomez",
       "email": "cliente@appsalon.com",
       "telefono": "3007654321",
-      "admin": false
+      "admin": false,
+      "rol": "cliente"
     }
   }
 }
